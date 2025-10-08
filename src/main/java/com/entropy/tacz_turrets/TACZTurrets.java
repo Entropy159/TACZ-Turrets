@@ -1,0 +1,40 @@
+package com.entropy.tacz_turrets;
+
+import com.entropy.tacz_turrets.common.registry.AttributeRegistry;
+import com.entropy.tacz_turrets.common.registry.EntityTypeRegistry;
+import com.entropy.tacz_turrets.common.registry.ItemRegistry;
+import com.mojang.logging.LogUtils;
+import com.tacz.guns.init.ModCreativeTabs;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.slf4j.Logger;
+
+@Mod(TACZTurrets.MODID)
+public class TACZTurrets {
+    public static final String MODID = "tacz_turrets";
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public TACZTurrets(FMLJavaModLoadingContext context) {
+        context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, prev) -> TACZTurretsConfig.createScreen(prev)));
+        IEventBus modEventBus = context.getModEventBus();
+        EntityTypeRegistry.TYPES.register(modEventBus);
+
+        ItemRegistry.ITEMS.register(modEventBus);
+        modEventBus.addListener(AttributeRegistry::register);
+
+        MinecraftForge.EVENT_BUS.register(this);
+        modEventBus.addListener(this::addCreative);
+
+        AutoConfig.register(TACZTurretsConfig.class, GsonConfigSerializer::new);
+    }
+
+    public void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == ModCreativeTabs.OTHER_TAB.getKey()) event.accept(ItemRegistry.TURRET.get());
+    }
+}

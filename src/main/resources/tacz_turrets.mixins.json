@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "tacz_turrets.refmap.json",
+  "package": "com.entropy.tacz_turrets.mixins",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "i i",
+    " I ",
+    "E E"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "E": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "item": "tacz_turrets:turret"
+  }
+}

@@ -1,30 +1,24 @@
 package com.entropy.tacz_turrets;
 
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.clothconfig2.api.ConfigBuilder;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-@Config(name = TACZTurrets.MODID)
-public class TACZTurretsConfig implements ConfigData {
-    public boolean consumeAmmo = true;
+@Mod.EventBusSubscriber(modid = TACZTurrets.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class TACZTurretsConfig {
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static TACZTurretsConfig get() {
-        return AutoConfig.getConfigHolder(TACZTurretsConfig.class).getConfig();
-    }
+    private static final ForgeConfigSpec.BooleanValue CONSUME_AMMO = BUILDER
+            .comment("Whether turrets need ammo")
+            .define("consumeAmmo", true);
 
-    public static Screen createScreen(Screen parent) {
-        TACZTurretsConfig config = get();
-        ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent).setTitle(Component.literal("TACZ Turrets")).setSavingRunnable(() -> {
-            AutoConfig.getConfigHolder(TACZTurretsConfig.class).save();
-        });
-        ConfigCategory mainCategory = builder.getOrCreateCategory(Component.literal("Main"));
-        ConfigEntryBuilder entryBuilder = builder.entryBuilder();
-        mainCategory.addEntry(entryBuilder.startBooleanToggle(Component.literal("Consume Ammo"), config.consumeAmmo).setDefaultValue(false).setSaveConsumer(newVal -> config.consumeAmmo = newVal).build());
-        return builder.build();
+    static final ForgeConfigSpec SPEC = BUILDER.build();
+
+    public static boolean consumeAmmo;
+
+    @SubscribeEvent
+    static void onLoad(final ModConfigEvent event) {
+        consumeAmmo = CONSUME_AMMO.get();
     }
 }

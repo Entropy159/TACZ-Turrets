@@ -119,7 +119,6 @@ dependencies {
     jarJar "software.bernie.geckolib:geckolib-forge-${minecraft_version}:[${geckolib_version},)", "net.tslat.smartbrainlib:SmartBrainLib-forge-${minecraft_version}:[${smartbrainlib_version},)"
 
     implementation fg.deobf("maven.modrinth:timeless-and-classics-zero:${tacz_version}")
-    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:11.1.136")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 

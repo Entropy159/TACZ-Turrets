@@ -346,7 +346,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         List<ItemEntity> items = this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.1));
         if (!items.isEmpty() && !level().isClientSide()) {
             for (ItemEntity item : items) {
-                if ((item.getItem().getItem() instanceof ModernKineticGunItem && getMainHandItem().isEmpty()) || (item.getItem().getItem() instanceof AmmoItem ammo && ammo.isAmmoOfGun(getMainHandItem(), item.getItem()) && TACZTurretsConfig.get().consumeAmmo)) {
+                if ((item.getItem().getItem() instanceof ModernKineticGunItem && getMainHandItem().isEmpty()) || (item.getItem().getItem() instanceof AmmoItem ammo && ammo.isAmmoOfGun(getMainHandItem(), item.getItem()) && TACZTurretsConfig.consumeAmmo)) {
                     pickUpItem(item);
                 }
             }
@@ -478,7 +478,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     public boolean needCheckAmmo() {
-        return TACZTurretsConfig.get().consumeAmmo;
+        return TACZTurretsConfig.consumeAmmo;
     }
 
     public boolean consumesAmmoOrNot() {
@@ -536,8 +536,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             ModSyncedEntityData.AIMING_PROGRESS_KEY.setValue(this.tacz$shooter, this.tacz$data.aimingProgress);
             ModSyncedEntityData.IS_AIMING_KEY.setValue(this.tacz$shooter, this.tacz$data.isAiming);
             ModSyncedEntityData.SPRINT_TIME_KEY.setValue(this.tacz$shooter, this.tacz$data.sprintTimeS);
-            boolean hasAmmo = !TACZTurretsConfig.get().consumeAmmo;
-            if (TACZTurretsConfig.get().consumeAmmo) {
+            boolean hasAmmo = !TACZTurretsConfig.consumeAmmo;
+            if (TACZTurretsConfig.consumeAmmo) {
                 BlockEntity blockEntity = level().getBlockEntity(blockPosition()) == null ? level().getBlockEntity(blockPosition().below()) : level().getBlockEntity(blockPosition());
                 if (blockEntity != null && blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().isPresent()) {
                     IItemHandler handler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().get();

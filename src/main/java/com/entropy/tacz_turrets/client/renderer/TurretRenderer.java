@@ -53,9 +53,11 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
         poseStack.mulPose(Axis.YN.rotationDegrees(turret.getYHeadRot() + 180));
         poseStack.mulPose(Axis.XN.rotationDegrees(turret.getXRot()));
 
-        ItemStack stack = turret.getMainHandItem();
-        if (!stack.isEmpty()) {
-            Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, packedLight, packedOverlay, poseStack, bufferSource, turret.level(), 0);
+        if (turret.hasGun()) {
+            if (turret.hasMinigun()) {
+                poseStack.mulPose(Axis.XN.rotationDegrees(90));
+            }
+            Minecraft.getInstance().getItemRenderer().renderStatic(turret.getGunStack(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, packedLight, packedOverlay, poseStack, bufferSource, turret.level(), 0);
         }
 
         poseStack.popPose();

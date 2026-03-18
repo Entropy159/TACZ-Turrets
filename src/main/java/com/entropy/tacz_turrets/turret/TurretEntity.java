@@ -145,6 +145,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         return hasGun() ? (ModernKineticGunItem) getGunStack().getItem() : null;
     }
 
+    public boolean hasMinigun() {
+        return hasGun() && TimelessAPI.getGunDisplay(getGunStack()).map(display -> display.getThirdPersonAnimation().equals("minigun")).orElse(false);
+    }
+
     public boolean hasGun() {
         return getGunStack().getItem() instanceof ModernKineticGunItem;
     }

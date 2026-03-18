@@ -10,6 +10,7 @@ import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ShootResult;
 import com.tacz.guns.api.item.IAmmo;
+import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.init.ModItems;
 import com.tacz.guns.item.AmmoItem;
@@ -149,11 +150,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     public boolean gunHasAmmo() {
-        return hasGun() && (getGunItem().getCurrentAmmoCount(getGunStack()) > 0);
-    }
-
-    public boolean isRightAmmo(ItemStack stack) {
-        return hasGun() && stack.getItem() instanceof IAmmo ammo && ammo.isAmmoOfGun(getGunStack(), stack);
+        if (!hasGun()) return false;
+        if (getGunItem().useInventoryAmmo(getGunStack())) {
+            return getGunItem().hasInventoryAmmo(this, getGunStack(), gunOperator.needCheckAmmo());
+        }
+        return getGunItem().getCurrentAmmoCount(getGunStack()) > 0;
     }
 
     public boolean isEnabled() {
@@ -166,7 +167,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         ShootResult result = shoot();
         switch (result) {
             case NEED_BOLT -> gunOperator.bolt();
-            case NO_AMMO -> gunOperator.reload();
+            case NO_AMMO -> {
+                collectAmmo();
+                gunOperator.reload();
+            }
             case NOT_DRAW -> gunOperator.draw(this::getGunStack);
         }
         if (TACZTurretsConfig.logTurretShootResults) TACZTurrets.LOGGER.info("Turret shoot result {}", result);
@@ -177,7 +181,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     public boolean hasAmmo() {
-        if (!TACZTurretsConfig.consumeAmmo) return true;
+        if (!gunOperator.consumesAmmoOrNot()) return true;
         if (gunHasAmmo()) return true;
         for (int slot = 0; slot < getSlots(); slot++) {
             if (isRightAmmo(getStackInSlot(slot))) {
@@ -187,8 +191,31 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         return false;
     }
 
+    public boolean isRightAmmo(ItemStack stack) {
+        if (stack.getItem() instanceof IAmmoBox ammoBox) {
+            if (ammoBox.isAllTypeCreative(stack)) {
+                return true;
+            }
+            return hasGun() && ammoBox.isAmmoBoxOfGun(getGunStack(), stack);
+        }
+        return hasGun() && stack.getItem() instanceof IAmmo ammo && ammo.isAmmoOfGun(getGunStack(), stack);
+    }
+
+    public boolean hasCreativeAmmo() {
+        for (int slot = 0; slot < getSlots(); slot++) {
+            if (isCreativeAmmo(getStackInSlot(slot))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isCreativeAmmo(ItemStack stack) {
+        return stack.getItem() instanceof IAmmoBox ammoBox && (ammoBox.isCreative(stack) || ammoBox.isAllTypeCreative(stack));
+    }
+
     public void collectAmmo() {
-        if (TACZTurretsConfig.consumeAmmo && isEnabled()) {
+        if (shouldCollectAmmo()) {
             BlockEntity blockEntity = level().getBlockEntity(blockPosition()) == null ? level().getBlockEntity(blockPosition().below()) : level().getBlockEntity(blockPosition());
             if (blockEntity != null) {
                 blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
@@ -201,11 +228,18 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
                                     handler.insertItem(handlerSlot, remainder, false);
                                 }
                             }
+                            if (hasCreativeAmmo()) {
+                                return;
+                            }
                         }
                     }
                 });
             }
         }
+    }
+
+    public boolean shouldCollectAmmo() {
+        return gunOperator.consumesAmmoOrNot() && isEnabled() && !hasCreativeAmmo();
     }
 
     public void pickUpItem(@NotNull ItemEntity itemEntity) {

@@ -48,7 +48,7 @@ public class TurretItem extends Item implements GeoItem {
     @Override
     public @NotNull InteractionResult useOn(UseOnContext context) {
         if (context.getLevel().isClientSide() || context.getPlayer() == null) {
-            return InteractionResult.CONSUME;
+            return InteractionResult.PASS;
         }
         context.getLevel().addFreshEntity(new TurretEntity(context.getLevel(), context.getClickedPos().relative(context.getClickedFace()), context.getPlayer()));
         if (!context.getPlayer().isCreative()) context.getItemInHand().shrink(1);

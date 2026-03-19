@@ -121,7 +121,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.put("Inventory", inventory.serializeNBT());
-        tag.putUUID("Owner", owner);
+        if (owner != null) tag.putUUID("Owner", owner);
         tag.putString("EnableType", enableType.name());
     }
 
@@ -129,7 +129,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         inventory.deserializeNBT(tag.getCompound("Inventory"));
-        owner = tag.getUUID("Owner");
+        if (tag.contains("Owner")) owner = tag.getUUID("Owner");
         enableType = TurretEnableType.valueOf(tag.getString("EnableType"));
     }
 

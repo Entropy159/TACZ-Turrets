@@ -3,7 +3,7 @@ name: Bug report
 about: An issue with the mod, unexpected behavior
 title: ''
 labels: bug
-assignees: ''
+assignees: Entropy159
 
 ---
 

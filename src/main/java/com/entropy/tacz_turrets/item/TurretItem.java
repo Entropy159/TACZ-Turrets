@@ -1,6 +1,7 @@
 package com.entropy.tacz_turrets.item;
 
 import com.entropy.tacz_turrets.client.renderer.TurretItemRenderer;
+import com.entropy.tacz_turrets.registry.SoundRegistry;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.InteractionResult;
@@ -50,7 +51,9 @@ public class TurretItem extends Item implements GeoItem {
         if (context.getLevel().isClientSide() || context.getPlayer() == null) {
             return InteractionResult.PASS;
         }
-        context.getLevel().addFreshEntity(new TurretEntity(context.getLevel(), context.getClickedPos().relative(context.getClickedFace()), context.getPlayer()));
+        TurretEntity turret = new TurretEntity(context.getLevel(), context.getClickedPos().relative(context.getClickedFace()), context.getPlayer());
+        context.getLevel().addFreshEntity(turret);
+        turret.playTurretSound(SoundRegistry.TURRET_PLACE.get());
         if (!context.getPlayer().isCreative()) context.getItemInHand().shrink(1);
         return InteractionResult.CONSUME;
     }

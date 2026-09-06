@@ -1,6 +1,9 @@
 {
     "replace": false,
     "values": [
-        "simpleenemymod:pmcunit"
+        {
+            "id": "simpleenemymod:pmcunit",
+            "required": false
+        }
     ]
 }

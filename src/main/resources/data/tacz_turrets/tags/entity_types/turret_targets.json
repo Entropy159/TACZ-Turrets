@@ -1,7 +1,13 @@
 {
     "replace": false,
     "values": [
-        "simpleenemymod:usunit",
-        "simpleenemymod:ruunit"
+        {
+            "id": "simpleenemymod:usunit",
+            "required": false
+        },
+        {
+            "id": "simpleenemymod:ruunit",
+            "required": false
+        }
     ]
 }

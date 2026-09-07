@@ -2,7 +2,7 @@ package com.entropy.tacz_turrets.client.model;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.turret.TurretEntity;
-import com.entropy.tacz_turrets.turret.TurretState;
+import com.entropy.tacz_turrets.turret.state.TurretState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.constant.DataTickets;

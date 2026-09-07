@@ -2,10 +2,10 @@ package com.entropy.tacz_turrets.menu;
 
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.registry.MenuRegistry;
-import com.entropy.tacz_turrets.turret.PlayerTargeting;
-import com.entropy.tacz_turrets.turret.TurretEnableType;
+import com.entropy.tacz_turrets.turret.state.PlayerTargeting;
+import com.entropy.tacz_turrets.turret.state.TurretEnableType;
 import com.entropy.tacz_turrets.turret.TurretEntity;
-import com.entropy.tacz_turrets.turret.TurretMode;
+import com.entropy.tacz_turrets.turret.state.TurretMode;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;

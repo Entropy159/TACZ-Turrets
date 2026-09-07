@@ -2,6 +2,7 @@ package com.entropy.tacz_turrets.command;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.util.TurretAllies;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -16,8 +17,6 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.mojang.authlib.GameProfile;
 
 @Mod.EventBusSubscriber(modid = TACZTurrets.MODID)
 public class TurretCommand {

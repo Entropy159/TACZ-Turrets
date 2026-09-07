@@ -1,4 +1,4 @@
-package com.entropy.tacz_turrets.turret;
+package com.entropy.tacz_turrets.turret.state;
 
 public enum PlayerTargeting {
     NEVER, RETALIATE, ALL;
@@ -8,9 +8,10 @@ public enum PlayerTargeting {
     }
 
     public static PlayerTargeting byName(String name) {
-        for (PlayerTargeting targeting : values()) {
-            if (targeting.name().equals(name)) return targeting;
+        try {
+            return PlayerTargeting.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return RETALIATE;
         }
-        return RETALIATE;
     }
 }

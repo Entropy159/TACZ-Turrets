@@ -1,10 +1,10 @@
 package com.entropy.tacz_turrets.config;
 
 import com.entropy.tacz_turrets.TACZTurrets;
-import com.entropy.tacz_turrets.turret.HealthBarStyle;
-import com.entropy.tacz_turrets.turret.InaccuracyMode;
-import com.entropy.tacz_turrets.turret.RecoilType;
-import com.entropy.tacz_turrets.turret.RetaliateTargeting;
+import com.entropy.tacz_turrets.turret.state.HealthBarStyle;
+import com.entropy.tacz_turrets.turret.state.InaccuracyMode;
+import com.entropy.tacz_turrets.turret.state.RecoilType;
+import com.entropy.tacz_turrets.turret.state.RetaliateTargeting;
 import com.entropy.tacz_turrets.util.ItemFilter;
 import com.entropy.tacz_turrets.util.TargetFilter;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -226,7 +226,7 @@ public class TACZTurretsConfig {
     public static TargetFilter damageableEntities = TargetFilter.of(DAMAGEABLE_ENTITIES.getDefault());
     public static InaccuracyMode inaccuracyMode = INACCURACY_MODE.getDefault();
     public static double distanceInaccuracy = DISTANCE_INACCURACY.getDefault();
-    public static double randomInaccuracy = RANDOM_INACCURACY.getDefault();
+    public static float randomInaccuracy = RANDOM_INACCURACY.getDefault().floatValue();
     public static int adaptiveRange = ADAPTIVE_RANGE.getDefault();
     public static boolean repairParticles = REPAIR_PARTICLES.getDefault();
     public static List<? extends String> repairSounds = REPAIR_SOUNDS.getDefault();
@@ -247,10 +247,10 @@ public class TACZTurretsConfig {
     public static boolean respectTeams = RESPECT_TEAMS.getDefault();
     public static boolean creditKillsToOwner = CREDIT_KILLS_TO_OWNER.getDefault();
     public static boolean passiveHealing = PASSIVE_HEALING.getDefault();
-    public static double passiveHealAmount = PASSIVE_HEAL_AMOUNT.getDefault();
+    public static float passiveHealAmount = PASSIVE_HEAL_AMOUNT.getDefault().floatValue();
     public static int passiveHealInterval = PASSIVE_HEAL_INTERVAL.getDefault();
     public static ItemFilter repairItems = ItemFilter.of(REPAIR_ITEMS.getDefault());
-    public static double repairAmount = REPAIR_AMOUNT.getDefault();
+    public static float repairAmount = REPAIR_AMOUNT.getDefault().floatValue();
     public static boolean requireEnergy = REQUIRE_ENERGY.getDefault();
     public static int energyCapacity = ENERGY_CAPACITY.getDefault();
     public static int energyTransferRate = ENERGY_TRANSFER_RATE.getDefault();
@@ -285,7 +285,7 @@ public class TACZTurretsConfig {
         damageableEntities = TargetFilter.of(DAMAGEABLE_ENTITIES.get());
         inaccuracyMode = INACCURACY_MODE.get();
         distanceInaccuracy = DISTANCE_INACCURACY.get();
-        randomInaccuracy = RANDOM_INACCURACY.get();
+        randomInaccuracy = RANDOM_INACCURACY.get().floatValue();
         adaptiveRange = ADAPTIVE_RANGE.get();
         repairParticles = REPAIR_PARTICLES.get();
         repairSounds = REPAIR_SOUNDS.get();
@@ -306,10 +306,10 @@ public class TACZTurretsConfig {
         respectTeams = RESPECT_TEAMS.get();
         creditKillsToOwner = CREDIT_KILLS_TO_OWNER.get();
         passiveHealing = PASSIVE_HEALING.get();
-        passiveHealAmount = PASSIVE_HEAL_AMOUNT.get();
+        passiveHealAmount = PASSIVE_HEAL_AMOUNT.get().floatValue();
         passiveHealInterval = PASSIVE_HEAL_INTERVAL.get();
         repairItems = ItemFilter.of(REPAIR_ITEMS.get());
-        repairAmount = REPAIR_AMOUNT.get();
+        repairAmount = REPAIR_AMOUNT.get().floatValue();
         requireEnergy = REQUIRE_ENERGY.get();
         energyCapacity = ENERGY_CAPACITY.get();
         energyTransferRate = ENERGY_TRANSFER_RATE.get();

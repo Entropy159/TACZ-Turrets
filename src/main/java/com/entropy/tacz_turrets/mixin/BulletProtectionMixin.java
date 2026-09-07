@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import javax.annotation.Nullable;
@@ -17,7 +18,7 @@ import java.util.List;
 public class BulletProtectionMixin {
     @ModifyReturnValue(method = "findEntityOnPath", at = @At("RETURN"), remap = false)
     private static EntityKineticBullet.EntityResult turretBulletPassesThrough(@Nullable EntityKineticBullet.EntityResult original, Projectile bulletEntity, Vec3 startVec, Vec3 endVec) {
-        if (original == null || !isProtected(bulletEntity, original)) return original;
+        if (original == null || !taczTurrets$isProtected(bulletEntity, original)) return original;
 
         EntityKineticBullet.EntityResult closest = null;
         double closestDistance = Double.MAX_VALUE;
@@ -34,11 +35,12 @@ public class BulletProtectionMixin {
     @ModifyReturnValue(method = "findEntitiesOnPath", at = @At("RETURN"), remap = false)
     private static List<EntityKineticBullet.EntityResult> turretBulletsPassThrough(List<EntityKineticBullet.EntityResult> original, Projectile bulletEntity, Vec3 startVec, Vec3 endVec) {
         if (original.isEmpty()) return original;
-        original.removeIf(result -> isProtected(bulletEntity, result));
+        original.removeIf(result -> taczTurrets$isProtected(bulletEntity, result));
         return original;
     }
 
-    private static boolean isProtected(Projectile bulletEntity, EntityKineticBullet.EntityResult result) {
+    @Unique
+    private static boolean taczTurrets$isProtected(Projectile bulletEntity, EntityKineticBullet.EntityResult result) {
         return bulletEntity.getOwner() instanceof TurretEntity turret && result.getEntity() instanceof LivingEntity living && turret.isProtectedFromFire(living);
     }
 }

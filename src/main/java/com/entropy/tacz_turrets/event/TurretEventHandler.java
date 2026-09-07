@@ -2,7 +2,7 @@ package com.entropy.tacz_turrets.event;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
-import com.entropy.tacz_turrets.turret.RetaliateTargeting;
+import com.entropy.tacz_turrets.turret.state.RetaliateTargeting;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;

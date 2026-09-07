@@ -1,4 +1,4 @@
-package com.entropy.tacz_turrets.turret;
+package com.entropy.tacz_turrets.turret.state;
 
 public enum TurretMode {
     AGGRESSIVE, CONSERVATIVE, ADAPTIVE;
@@ -8,9 +8,10 @@ public enum TurretMode {
     }
 
     public static TurretMode byName(String name) {
-        for (TurretMode mode : values()) {
-            if (mode.name().equals(name)) return mode;
+        try {
+            return TurretMode.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return AGGRESSIVE;
         }
-        return AGGRESSIVE;
     }
 }

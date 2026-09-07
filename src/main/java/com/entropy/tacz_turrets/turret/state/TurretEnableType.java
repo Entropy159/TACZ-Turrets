@@ -1,4 +1,4 @@
-package com.entropy.tacz_turrets.turret;
+package com.entropy.tacz_turrets.turret.state;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -19,10 +19,11 @@ public enum TurretEnableType {
     }
 
     public static TurretEnableType byName(String name) {
-        for (TurretEnableType type : values()) {
-            if (type.name().equals(name)) return type;
+        try {
+            return TurretEnableType.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ALWAYS_ON;
         }
-        return ALWAYS_ON;
     }
 
     public boolean shouldDisable(Level level, BlockPos blockPos) {

@@ -8,29 +8,28 @@ import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.registry.SoundRegistry;
 import com.entropy.tacz_turrets.registry.TagRegistry;
 import com.entropy.tacz_turrets.turret.ai.TaczShootAttack;
+import com.entropy.tacz_turrets.turret.state.*;
 import com.entropy.tacz_turrets.util.HasTurretInventory;
 import com.entropy.tacz_turrets.util.TargetFilter;
 import com.entropy.tacz_turrets.util.TurretAllies;
 import com.entropy.tacz_turrets.util.TurretEnergyStorage;
+import com.mojang.datafixers.util.Pair;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ShootResult;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
-import com.tacz.guns.config.common.GunConfig;
 import com.tacz.guns.init.ModItems;
 import com.tacz.guns.item.ModernKineticGunItem;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
-import com.tacz.guns.sound.SoundManager;
-import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,7 +39,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -54,7 +52,6 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
@@ -90,12 +87,7 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, HasTurretInventory, GeoEntity, MenuProvider {
     public static final EntityType<TurretEntity> TYPE = EntityType.Builder.<TurretEntity>of(TurretEntity::new, MobCategory.MISC).sized(1f, 1f).build("turret");
@@ -282,7 +274,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     private float getInaccuracy() {
         return switch (TACZTurretsConfig.inaccuracyMode) {
-            case RANDOM -> (float) TACZTurretsConfig.randomInaccuracy;
+            case RANDOM -> TACZTurretsConfig.randomInaccuracy;
             case DISTANCE -> {
                 LivingEntity target = BrainUtils.getTargetOfEntity(this);
                 if (target == null) yield 0.0F;
@@ -394,7 +386,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (!TACZTurretsConfig.passiveHealing) return;
         if (getHealth() >= getMaxHealth()) return;
         if (tickCount % TACZTurretsConfig.passiveHealInterval != 0) return;
-        heal((float) TACZTurretsConfig.passiveHealAmount);
+        heal(TACZTurretsConfig.passiveHealAmount);
     }
 
     @Override
@@ -523,8 +515,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         ItemStack heldStack = player.getItemInHand(hand);
         if (!player.isCrouching() && TACZTurretsConfig.repairItems.matches(heldStack)) {
             if (getHealth() < getMaxHealth()) {
-                heal((float) TACZTurretsConfig.repairAmount);
-                if (!player.isCreative()) heldStack.shrink(1);
+                heal(TACZTurretsConfig.repairAmount);
+                if (!player.getAbilities().instabuild) heldStack.shrink(1);
                 playRepairSound();
                 spawnRepairParticles();
             }
@@ -543,7 +535,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
                     spawnAtLocation(slotStack);
                 }
             }
-            if (!player.isCreative()) {
+            if (!player.getAbilities().instabuild) {
                 player.getInventory().add(new ItemStack(ItemRegistry.TURRET.get()));
             }
             playTurretSound(SoundRegistry.TURRET_PICKUP.get());
@@ -673,7 +665,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
                 List<TurretEntity> entities = level().getEntitiesOfClass(TurretEntity.class, AABB.ofSize(position(), 64, 16, 64));
                 List<TurretEntity> filter1 = entities.stream().filter((e) -> e.hasLineOfSight(entity) || BehaviorUtils.entityIsVisible(e.getBrain(), entity)).toList();
                 for (TurretEntity turret : filter1) {
-                    if (entity instanceof Player player && Objects.equals(turret.owner, owner)) turret.markRetaliation(player);
+                    if (entity instanceof Player player && Objects.equals(turret.owner, owner))
+                        turret.markRetaliation(player);
                     if (turret.isValidTarget(entity)) turret.alertTo(entity);
                 }
             }
@@ -718,7 +711,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     protected void customServerAiStep() {
-        if (retaliateTicks < 0 && TACZTurretsConfig.retaliateTargeting != RetaliateTargeting.CLEAR_ON_DEATH) retaliateTicks = retaliationTicks();
+        if (retaliateTicks < 0 && TACZTurretsConfig.retaliateTargeting != RetaliateTargeting.CLEAR_ON_DEATH)
+            retaliateTicks = retaliationTicks();
         if (retaliateTicks > 0 && --retaliateTicks == 0) retaliateTarget = null;
         tickBrain(this);
         retargetImmediately();
@@ -791,15 +785,15 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     public BrainActivityGroup<? extends TurretEntity> getCoreTasks() {
-        return BrainActivityGroup.coreTasks(new Behavior[]{new TargetOrRetaliate<TurretEntity>().isAllyIf((e, l) -> l instanceof TurretEntity).attackablePredicate(l -> l != null && isValidTarget(l) && hasLineOfSight(l)).alertAlliesWhen((m, e) -> e != null && m.hasLineOfSight(e)).runFor((e) -> 999), (new LookAtTarget<>()).runFor((entity) -> RandomSource.create().nextInt(40, 300))});
+        return BrainActivityGroup.coreTasks(new TargetOrRetaliate<>().isAllyIf((e, l) -> l instanceof TurretEntity).attackablePredicate(l -> l != null && isValidTarget(l) && hasLineOfSight(l)).alertAlliesWhen((m, e) -> e != null && m.hasLineOfSight(e)).runFor((e) -> 999), (new LookAtTarget<>()).runFor((entity) -> RandomSource.create().nextInt(40, 300)));
     }
 
     public BrainActivityGroup<? extends TurretEntity> getIdleTasks() {
-        return BrainActivityGroup.idleTasks(new Behavior[]{new FirstApplicableBehaviour<TurretEntity>(new TargetOrRetaliate<TurretEntity>().attackablePredicate(l -> l != null && isValidTarget(l) && hasLineOfSight(l)), new SetPlayerLookTarget<>(), new SetRandomLookTarget<>()), (new Idle<>()).runFor((entity) -> RandomSource.create().nextInt(30, 60))});
+        return BrainActivityGroup.idleTasks(new FirstApplicableBehaviour<>(new TargetOrRetaliate<>().attackablePredicate(l -> l != null && isValidTarget(l) && hasLineOfSight(l)), new SetPlayerLookTarget<>(), new SetRandomLookTarget<>()), new Idle<>().runFor((entity) -> RandomSource.create().nextInt(30, 60)));
     }
 
     public BrainActivityGroup<? extends TurretEntity> getFightTasks() {
-        return BrainActivityGroup.fightTasks(new Behavior[]{new InvalidateAttackTarget<TurretEntity>().invalidateIf((entity, target) -> !target.isAlive() || (target instanceof Player player && player.getAbilities().invulnerable) || !entity.hasLineOfSight(target) || !entity.isValidTarget(target) || entity.distanceToSqr(target) > entity.getRange() * entity.getRange()).ignoreFailedPathfinding(), new SetRetaliateTarget<>(), new TaczShootAttack<>(TACZTurretsConfig.turretRange).startCondition((x$0) -> getMainHandItem().is(ModItems.MODERN_KINETIC_GUN.get()) && gunOperator.getSynShootCoolDown() == 0)});
+        return BrainActivityGroup.fightTasks(new InvalidateAttackTarget<TurretEntity>().invalidateIf((entity, target) -> !target.isAlive() || (target instanceof Player player && player.getAbilities().invulnerable) || !entity.hasLineOfSight(target) || !entity.isValidTarget(target) || entity.distanceToSqr(target) > entity.getRange() * entity.getRange()).ignoreFailedPathfinding(), new SetRetaliateTarget<>(), new TaczShootAttack<>(TACZTurretsConfig.turretRange).startCondition((x$0) -> getMainHandItem().is(ModItems.MODERN_KINETIC_GUN.get()) && gunOperator.getSynShootCoolDown() == 0));
     }
 
     @Override
@@ -820,7 +814,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     public boolean isAlliedWithOwner(LivingEntity target) {
-        if (owner != null && level().getServer() != null && TurretAllies.get(level().getServer()).isAlly(owner, target.getUUID())) return true;
+        if (owner != null && level().getServer() != null && TurretAllies.get(level().getServer()).isAlly(owner, target.getUUID()))
+            return true;
         if (!TACZTurretsConfig.respectTeams) return false;
         if (target.getTeam() == null) return false;
         if (isAlliedTo(target)) return true;
@@ -881,11 +876,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (target.getUUID().equals(owner)) return false;
         if (isAlliedWithOwner(target)) return false;
 
-        // Never target entities in the ignore tag or the config blacklist
         if (target.getType().is(TagRegistry.TURRET_IGNORED)) return false;
         if (TACZTurretsConfig.targetBlacklist.matches(target.getType())) return false;
 
-        if (target instanceof Player player) return canTargetPlayers() && !player.isCreative() && !player.isSpectator() && canEngagePlayer(player);
+        if (target instanceof Player player)
+            return canTargetPlayers() && !player.isCreative() && !player.isSpectator() && canEngagePlayer(player);
         return true;
     }
 
@@ -906,7 +901,6 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (!isValidTarget(target)) return false;
         if (target instanceof Player) return true;
 
-        // Direct anger target always passes
         if (target == getTarget()) return true;
         return isTargetableType(target);
     }
@@ -915,14 +909,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (target.getType().is(TagRegistry.TURRET_IGNORED)) return false;
         if (TACZTurretsConfig.targetBlacklist.matches(target.getType())) return false;
 
-        // Entities in the config whitelist or the turret_targets tag are always targeted
         if (TACZTurretsConfig.targetWhitelist.matches(target.getType())) return true;
         if (target.getType().is(TagRegistry.TURRET_TARGETS)) return true;
 
-        // If targetAllMobs is on, target everything that passed the above filters
         if (TACZTurretsConfig.targetAllMobs) return true;
 
-        // Otherwise: vanilla monsters
         if (target instanceof Monster) return true;
         return target.getType().getCategory() == MobCategory.MONSTER;
     }

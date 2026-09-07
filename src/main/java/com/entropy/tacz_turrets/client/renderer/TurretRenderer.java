@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -30,7 +29,7 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
     @Override
     protected void applyRotations(TurretEntity turret, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
         if (turret != null && turret.deathTime > 0) {
-            float deathRotation = ((float) turret.deathTime + partialTick - 1.0F) / 20.0F * 1.6F;
+            float deathRotation = (turret.deathTime + partialTick - 1.0F) / 20.0F * 1.6F;
             poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1.0F) * this.getDeathMaxRotation(animatable)));
         } else if (animatable.hasCustomName()) {
             String name = animatable.getName().getString();

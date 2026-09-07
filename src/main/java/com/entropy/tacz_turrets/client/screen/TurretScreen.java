@@ -6,17 +6,17 @@ import com.entropy.tacz_turrets.menu.TurretLayout;
 import com.entropy.tacz_turrets.menu.TurretMenu;
 import com.entropy.tacz_turrets.network.TACZTurretsNetwork;
 import com.entropy.tacz_turrets.network.ToggleAllyPacket;
-import com.entropy.tacz_turrets.turret.HealthBarStyle;
+import com.entropy.tacz_turrets.turret.state.HealthBarStyle;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -252,7 +252,8 @@ public class TurretScreen extends AbstractContainerScreen<TurretMenu> {
                     UUID target = players.get(index).getProfile().getId();
                     menu.toggleAllyLocally(target);
                     TACZTurretsNetwork.CHANNEL.sendToServer(new ToggleAllyPacket(target));
-                    if (minecraft != null) minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    if (minecraft != null)
+                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }
             }

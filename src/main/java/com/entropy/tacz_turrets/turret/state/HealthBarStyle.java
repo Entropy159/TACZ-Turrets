@@ -1,4 +1,4 @@
-package com.entropy.tacz_turrets.turret;
+package com.entropy.tacz_turrets.turret.state;
 
 public enum HealthBarStyle {
     COLOR, GREEN_TO_RED

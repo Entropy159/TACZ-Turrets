@@ -1,6 +1,7 @@
-package com.entropy.tacz_turrets.turret;
+package com.entropy.tacz_turrets.turret.state;
 
 import com.entropy.tacz_turrets.TACZTurrets;
+import com.entropy.tacz_turrets.turret.TurretEntity;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;

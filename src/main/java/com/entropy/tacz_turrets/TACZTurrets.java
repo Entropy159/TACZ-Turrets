@@ -1,12 +1,8 @@
 package com.entropy.tacz_turrets;
 
-import com.entropy.tacz_turrets.registry.AttributeRegistry;
-import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
-import com.entropy.tacz_turrets.registry.ItemRegistry;
-import com.entropy.tacz_turrets.registry.MenuRegistry;
-import com.entropy.tacz_turrets.registry.SoundRegistry;
-import com.entropy.tacz_turrets.network.TACZTurretsNetwork;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
+import com.entropy.tacz_turrets.network.TACZTurretsNetwork;
+import com.entropy.tacz_turrets.registry.*;
 import com.mojang.logging.LogUtils;
 import com.tacz.guns.init.ModCreativeTabs;
 import net.minecraft.resources.ResourceLocation;

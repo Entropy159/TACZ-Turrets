@@ -8,11 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class TurretAllies extends SavedData {
     private static final String FILE_NAME = "tacz_turrets_allies";
@@ -34,8 +30,8 @@ public class TurretAllies extends SavedData {
             if (!entry.hasUUID(OWNER_TAG)) continue;
             Set<UUID> trusted = new HashSet<>();
             ListTag list = entry.getList(ALLIES_TAG, Tag.TAG_INT_ARRAY);
-            for (int ally = 0; ally < list.size(); ally++) {
-                trusted.add(NbtUtils.loadUUID(list.get(ally)));
+            for (Tag value : list) {
+                trusted.add(NbtUtils.loadUUID(value));
             }
             data.allies.put(entry.getUUID(OWNER_TAG), trusted);
         }

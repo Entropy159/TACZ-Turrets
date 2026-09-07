@@ -1,9 +1,8 @@
 package com.entropy.tacz_turrets.client.model;
 
 import com.entropy.tacz_turrets.TACZTurrets;
-import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.item.TurretItem;
-import com.entropy.tacz_turrets.turret.TurretState;
+import com.entropy.tacz_turrets.turret.state.TurretState;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.core.animation.AnimationState;

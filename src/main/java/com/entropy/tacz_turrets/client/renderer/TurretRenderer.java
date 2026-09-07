@@ -51,7 +51,8 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
 
         model.getBone("gun").ifPresent(gun -> poseStack.translate(gun.getModelPosition().x / 16f, gun.getModelPosition().y / 16f, gun.getModelPosition().z / 16f));
         poseStack.mulPose(Axis.YN.rotationDegrees(turret.getYHeadRot() + 180));
-        poseStack.mulPose(Axis.XN.rotationDegrees(turret.getXRot()));
+        poseStack.mulPose(Axis.XN.rotationDegrees(turret.getXRot() - turret.getRecoilDegrees(partialTick)));
+        poseStack.translate(0.0F, 0.0F, turret.getRecoilPush(partialTick));
 
         if (turret.hasGun()) {
             if (turret.hasMinigun()) {

@@ -33,7 +33,7 @@ public class TurretModel extends GeoModel<TurretEntity> {
         EntityModelData data = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
         float yaw = -turret.getYHeadRot() + 180;
         if (head != null) {
-            head.setRotX(data.headPitch() * Mth.DEG_TO_RAD);
+            head.setRotX((data.headPitch() - turret.getRecoilDegrees(animationState.getPartialTick())) * Mth.DEG_TO_RAD);
             head.setRotY(yaw * Mth.DEG_TO_RAD);
         }
         CoreGeoBone center = getAnimationProcessor().getBone("center");

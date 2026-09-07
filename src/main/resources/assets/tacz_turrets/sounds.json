@@ -1,0 +1,17 @@
+{
+  "turret_place": {
+    "subtitle": "subtitles.tacz_turrets.turret_place",
+    "sounds": [
+      "tacz_turrets:turret_drop1",
+      "tacz_turrets:turret_drop2"
+    ]
+  },
+  "turret_pickup": {
+    "subtitle": "subtitles.tacz_turrets.turret_pickup",
+    "sounds": [
+      "tacz_turrets:turret_pickup1",
+      "tacz_turrets:turret_pickup2",
+      "tacz_turrets:turret_pickup3"
+    ]
+  }
+}

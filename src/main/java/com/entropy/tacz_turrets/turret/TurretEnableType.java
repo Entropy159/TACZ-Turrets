@@ -14,6 +14,17 @@ public enum TurretEnableType {
         powerFunction = function;
     }
 
+    public TurretEnableType next() {
+        return values()[(ordinal() + 1) % values().length];
+    }
+
+    public static TurretEnableType byName(String name) {
+        for (TurretEnableType type : values()) {
+            if (type.name().equals(name)) return type;
+        }
+        return ALWAYS_ON;
+    }
+
     public boolean shouldDisable(Level level, BlockPos blockPos) {
         return powerFunction.apply(level.hasNeighborSignal(blockPos));
     }

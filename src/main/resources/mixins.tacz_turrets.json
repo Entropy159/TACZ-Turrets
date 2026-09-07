@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "mixins.tacz_turrets.refmap.json",
   "mixins": [
-    "AmmoCheckMixin"
+    "AmmoCheckMixin",
+    "BulletProtectionMixin",
+    "InaccuracyMixin",
+    "ShootSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

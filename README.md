@@ -10,3 +10,5 @@ This mod adds turrets that use guns from TACZ. Simply click it with a gun, or dr
 To give a turret a gun, drop it near the turret. To give it ammo, either drop it near the turret or put the turret on a chest and fill the chest with ammo. GUI is a work in progress.
 
 Huge thanks to Corrinedev for making [TACZ NPCs](https://modrinth.com/mod/tacz-npcs), it was very helpful with getting started to see how things work.
+
+NeoForge 1.21.1: [https://github.com/Entropy159/TACZ-Turrets-1.21](https://github.com/Entropy159/TACZ-Turrets-1.21)

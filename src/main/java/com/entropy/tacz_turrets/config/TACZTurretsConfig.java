@@ -243,7 +243,7 @@ public class TACZTurretsConfig {
     private static final Builder CLIENT_BUILDER = new Builder();
 
     public static final EnumValue<TurretModelType> MODEL_TYPE = CLIENT_BUILDER
-            .comment("Which model turrets use. Only changes how turrets look on your screen. RETRO is the original, MODERN is an armored gun cradle.")
+            .comment("Change which model turrets use. Purely cosmetic.")
             .defineEnum("modelType", TurretModelType.RETRO);
 
     public static final EnumValue<HealthBarStyle> HEALTH_BAR_STYLE = CLIENT_BUILDER

@@ -28,13 +28,18 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
     //?} else {
     /*protected void applyRotations(TurretEntity turret, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
     *///?}
+        if (isFlipped(turret)) {
+            poseStack.translate(0.0F, turret.getBbHeight() / nativeScale, 0.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        }
         if (turret.deathTime > 0) {
             float deathRotation = (turret.deathTime + partialTick - 1.0F) / 20.0F * 1.6F;
             poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1.0F) * getDeathMaxRotation(turret)));
-        } else if (LivingEntityRenderer.isEntityUpsideDown(turret)) {
-            poseStack.translate(0.0F, (turret.getBbHeight() + 0.1F) / nativeScale, 0.0F);
-            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
         }
+    }
+
+    public static boolean isFlipped(TurretEntity turret) {
+        return turret.isCeiling() || LivingEntityRenderer.isEntityUpsideDown(turret);
     }
 
     @Override
@@ -50,9 +55,10 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
         applyRotations(turret, poseStack, 0, 0, partialTick, turret.getScale());
     *///?}
 
+        float sign = isFlipped(turret) ? -1.0F : 1.0F;
         model.getBone("gun").ifPresent(gun -> poseStack.translate(gun.getModelPosition().x / 16f, gun.getModelPosition().y / 16f, gun.getModelPosition().z / 16f));
-        poseStack.mulPose(Axis.YN.rotationDegrees(turret.getYHeadRot() + 180));
-        poseStack.mulPose(Axis.XN.rotationDegrees(turret.getXRot() - turret.getRecoilDegrees(partialTick)));
+        poseStack.mulPose(Axis.YN.rotationDegrees(sign * turret.getYHeadRot() + 180));
+        poseStack.mulPose(Axis.XN.rotationDegrees(sign * turret.getXRot() - turret.getRecoilDegrees(partialTick)));
         poseStack.translate(0.0F, 0.0F, turret.getRecoilPush(partialTick));
 
         if (turret.hasGun()) {

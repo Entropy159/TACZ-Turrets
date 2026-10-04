@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum TurretModelType {
-    RETRO("turret"), MODERN("turret_modern");
+    RETRO("turret"), MODERN("turret_modern"), INDUSTRIAL("turret_industrial"), SCIFI("turret_scifi"), SCRAP("turret_scrap"), TACTICAL("turret_tactical");
 
     private final ResourceLocation model;
     private final ResourceLocation[] textures;

@@ -9,6 +9,30 @@
         "tacz_turrets:model": 1
       },
       "model": "tacz_turrets:item/turret_modern"
+    },
+    {
+      "predicate": {
+        "tacz_turrets:model": 2
+      },
+      "model": "tacz_turrets:item/turret_industrial"
+    },
+    {
+      "predicate": {
+        "tacz_turrets:model": 3
+      },
+      "model": "tacz_turrets:item/turret_scifi"
+    },
+    {
+      "predicate": {
+        "tacz_turrets:model": 4
+      },
+      "model": "tacz_turrets:item/turret_scrap"
+    },
+    {
+      "predicate": {
+        "tacz_turrets:model": 5
+      },
+      "model": "tacz_turrets:item/turret_tactical"
     }
   ]
 }

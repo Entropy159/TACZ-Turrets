@@ -63,6 +63,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 //? if forge {
@@ -138,6 +139,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private static final int RETALIATE_UNTIL_DEATH = -1;
     private static final EntityDataAccessor<Integer> RECOIL = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> CEILING = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.BOOLEAN);
     private boolean gunDrawn = false;
     private TurretEnableType enableType = TurretEnableType.ALWAYS_ON;
     private TurretMode mode = TurretMode.AGGRESSIVE;
@@ -175,12 +177,45 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         super.defineSynchedData();
         entityData.define(STATE, TurretState.NO_GUN.ordinal());
         entityData.define(RECOIL, 0);
+        entityData.define(CEILING, false);
     }
     //?} else {
     /*protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
         super.defineSynchedData(builder);
         builder.define(STATE, TurretState.NO_GUN.ordinal());
         builder.define(RECOIL, 0);
+        builder.define(CEILING, false);
+    }
+    *///?}
+
+    public boolean isCeiling() {
+        return entityData.get(CEILING);
+    }
+
+    public void setCeiling(boolean ceiling) {
+        entityData.set(CEILING, ceiling);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (CEILING.equals(key)) refreshDimensions();
+    }
+
+    @Override
+    public boolean isNoGravity() {
+        return isCeiling() || super.isNoGravity();
+    }
+
+    @Override
+    //? if forge {
+    protected float getStandingEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
+        return isCeiling() ? dimensions.height * 0.25F : super.getStandingEyeHeight(pose, dimensions);
+    }
+    //?} else {
+    /*protected @NotNull EntityDimensions getDefaultDimensions(@NotNull Pose pose) {
+        EntityDimensions dimensions = super.getDefaultDimensions(pose);
+        return isCeiling() ? dimensions.withEyeHeight(dimensions.height() * 0.25F) : dimensions;
     }
     *///?}
 
@@ -222,6 +257,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         tag.putString("PlayerTargeting", playerTargeting.name());
         tag.putString("OwnerName", ownerName);
         tag.putInt("Energy", energy.getEnergyStored());
+        tag.putBoolean("Ceiling", isCeiling());
     }
 
     @Override
@@ -239,6 +275,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         playerTargeting = Enums.byName(tag.getString("PlayerTargeting"), PlayerTargeting.RETALIATE);
         ownerName = tag.getString("OwnerName");
         energy.setEnergy(tag.getInt("Energy"));
+        setCeiling(tag.getBoolean("Ceiling"));
     }
 
     public ItemStack getGunStack() {
@@ -498,7 +535,16 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     private void onTickServerSide() {
         if (!level().isClientSide()) {
+            BlockPos ceiling = blockPosition().above();
+            if (isCeiling() && !Block.isFaceFull(level().getBlockState(ceiling).getCollisionShape(level(), ceiling), Direction.DOWN)) setCeiling(false);
             dropOverflow();
+            if (!isCeiling() && !onGround() && !level().getEntitiesOfClass(TurretEntity.class, getBoundingBox(), turret -> turret != this).isEmpty()) {
+                dropContents();
+                spawnAtLocation(new ItemStack(ItemRegistry.TURRET.get()));
+                playTurretSound(SoundRegistry.TURRET_PICKUP.get());
+                discard();
+                return;
+            }
             int recoil = entityData.get(RECOIL);
             if (recoil > 0) entityData.set(RECOIL, recoil - 1);
             tickEnergy();
@@ -712,10 +758,15 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     //?} else {
     /*protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NotNull DamageSource source, boolean recentlyHit) {
     *///?}
+        dropContents();
+    }
+
+    private void dropContents() {
         for (int i = 0; i < inventory.getSlots(); i++) {
             if (!inventory.getStackInSlot(i).isEmpty()) spawnAtLocation(inventory.extractItem(i, inventory.getStackInSlot(i).getCount(), false));
         }
         if (hasGun()) spawnAtLocation(getGunStack());
+        setGunStack(ItemStack.EMPTY);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.entropy.tacz_turrets.client.model;
 
 import com.entropy.tacz_turrets.TACZTurrets;
+import com.entropy.tacz_turrets.client.renderer.TurretRenderer;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretState;
@@ -34,9 +35,10 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
     public void setCustomAnimations(TurretEntity turret, long instanceId, AnimationState<TurretEntity> animationState) {
         var head = getAnimationProcessor().getBone("head");
         EntityModelData data = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
-        float yaw = -turret.getYHeadRot() + 180;
+        float sign = TurretRenderer.isFlipped(turret) ? -1.0F : 1.0F;
+        float yaw = -sign * turret.getYHeadRot() + 180;
         if (head != null) {
-            head.setRotX((data.headPitch() - turret.getRecoilDegrees(animationState.getPartialTick())) * Mth.DEG_TO_RAD);
+            head.setRotX((sign * data.headPitch() - turret.getRecoilDegrees(animationState.getPartialTick())) * Mth.DEG_TO_RAD);
             head.setRotY(yaw * Mth.DEG_TO_RAD);
         }
         var center = getAnimationProcessor().getBone("center");

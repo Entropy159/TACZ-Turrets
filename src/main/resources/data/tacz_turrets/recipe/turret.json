@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:iron_bars"
+    },
+    "E": {
+      "tag": "c:storage_blocks/iron"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "I I",
+    " B ",
+    "E E"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tacz_turrets:turret"
+  }
+}

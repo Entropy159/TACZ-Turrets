@@ -16,19 +16,8 @@ public class AmmoCheckMixin {
     @Final
     private LivingEntity shooter;
 
-    @ModifyReturnValue(method = "needCheckAmmo", at = @At("RETURN"), remap = false)
+    @ModifyReturnValue(method = {"needCheckAmmo", "consumesAmmoOrNot"}, at = @At("RETURN"), remap = false, require = 2)
     private boolean infiniteAmmoForTurrets(boolean original) {
-        if (shooter instanceof TurretEntity) {
-            return TACZTurretsConfig.consumeAmmo && original;
-        }
-        return original;
-    }
-
-    @ModifyReturnValue(method = "consumesAmmoOrNot", at = @At("RETURN"), remap = false)
-    private boolean allowInfinite(boolean original) {
-        if (shooter instanceof TurretEntity) {
-            return TACZTurretsConfig.consumeAmmo && original;
-        }
-        return original;
+        return original && (TACZTurretsConfig.CONSUME_AMMO.get() || !(shooter instanceof TurretEntity));
     }
 }

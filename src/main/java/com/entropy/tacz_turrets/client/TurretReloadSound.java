@@ -19,11 +19,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+//? if forge {
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+//?} else {
+/*import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+*///?}
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -32,7 +40,11 @@ import java.util.Map;
 
 import static com.entropy.tacz_turrets.TACZTurrets.MODID;
 
+//? if forge {
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = MODID)
+//?} else {
+/*@EventBusSubscriber(value = Dist.CLIENT, modid = MODID)
+*///?}
 public class TurretReloadSound {
     private static final String EMPTY_ANIMATION = "reload_empty";
     private static final String TACTICAL_ANIMATION = "reload_tactical";
@@ -42,12 +54,16 @@ public class TurretReloadSound {
     private static final Map<ResourceLocation, Map<String, ObjectAnimationSoundChannel>> CACHE = new HashMap<>();
 
     @SubscribeEvent
+    //? if forge {
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
+    //?} else {
+    /*public static void onClientTick(ClientTickEvent.Post event) {
+    *///?}
 
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.isPaused()) return;
-        if (!TACZTurretsConfig.enableSounds || !TACZTurretsConfig.reloadSound) {
+        if (!TACZTurretsConfig.ENABLE_SOUNDS.get() || !TACZTurretsConfig.RELOAD_SOUND.get()) {
             PLAYING.clear();
             return;
         }
@@ -82,7 +98,11 @@ public class TurretReloadSound {
         CACHE.clear();
     }
 
+    //? if forge {
     @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    //?} else {
+    /*@EventBusSubscriber(value = Dist.CLIENT, modid = MODID, bus = EventBusSubscriber.Bus.MOD)
+    *///?}
     public static class ReloadHandler {
         @SubscribeEvent
         public static void onRegisterReloadListeners(RegisterClientReloadListenersEvent event) {

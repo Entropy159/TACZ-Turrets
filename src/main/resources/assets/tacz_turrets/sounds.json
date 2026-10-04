@@ -13,5 +13,16 @@
       "tacz_turrets:turret_pickup2",
       "tacz_turrets:turret_pickup3"
     ]
+  },
+  "turret_hurt": {
+    "subtitle": "subtitles.tacz_turrets.turret_hurt",
+    "sounds": [
+      "tacz_turrets:turret_hurt1",
+      "tacz_turrets:turret_hurt2",
+      "tacz_turrets:turret_hurt3",
+      "tacz_turrets:turret_hurt4",
+      "tacz_turrets:turret_hurt5",
+      "tacz_turrets:turret_hurt6"
+    ]
   }
 }

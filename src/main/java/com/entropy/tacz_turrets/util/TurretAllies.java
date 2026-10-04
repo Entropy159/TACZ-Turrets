@@ -1,5 +1,7 @@
 package com.entropy.tacz_turrets.util;
 
+//? if neoforge
+/*import net.minecraft.core.HolderLookup;*/
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,10 +25,18 @@ public class TurretAllies extends SavedData {
     private final Map<UUID, Set<UUID>> allies = new HashMap<>();
 
     public static TurretAllies get(MinecraftServer server) {
+        //? if forge {
         return server.overworld().getDataStorage().computeIfAbsent(TurretAllies::load, TurretAllies::new, FILE_NAME);
+        //?} else {
+        /*return server.overworld().getDataStorage().computeIfAbsent(new Factory<>(TurretAllies::new, TurretAllies::load), FILE_NAME);
+        *///?}
     }
 
+    //? if forge {
     public static TurretAllies load(CompoundTag tag) {
+    //?} else {
+    /*public static TurretAllies load(CompoundTag tag, HolderLookup.Provider registries) {
+    *///?}
         TurretAllies data = new TurretAllies();
         ListTag owners = tag.getList(OWNERS_TAG, Tag.TAG_COMPOUND);
         for (int index = 0; index < owners.size(); index++) {
@@ -43,7 +53,11 @@ public class TurretAllies extends SavedData {
     }
 
     @Override
+    //? if forge {
     public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
+    //?} else {
+    /*public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
+    *///?}
         ListTag owners = new ListTag();
         allies.forEach((owner, trusted) -> {
             if (trusted.isEmpty()) return;
@@ -81,12 +95,7 @@ public class TurretAllies extends SavedData {
         return true;
     }
 
-    public boolean toggleAlly(UUID owner, UUID ally) {
-        if (isAlly(owner, ally)) {
-            removeAlly(owner, ally);
-            return false;
-        }
-        addAlly(owner, ally);
-        return true;
+    public void toggleAlly(UUID owner, UUID ally) {
+        if (!addAlly(owner, ally)) removeAlly(owner, ally);
     }
 }

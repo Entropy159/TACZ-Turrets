@@ -52,7 +52,7 @@ public class TurretLayout {
     }
 
     public static TurretLayout fromConfig() {
-        return new TurretLayout(TACZTurretsConfig.turretSlotRows, TACZTurretsConfig.turretSlotLength);
+        return new TurretLayout(TACZTurretsConfig.TURRET_SLOT_ROWS.get(), TACZTurretsConfig.TURRET_SLOT_LENGTH.get());
     }
 
     public int ammoSlotX(int index) {

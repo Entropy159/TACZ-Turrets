@@ -37,7 +37,7 @@ public class TurretContainer implements Container {
     @Override
     public @NotNull ItemStack getItem(int slot) {
         if (slot == GUN_SLOT) return turret.getGunStack();
-        return turret.getStackInSlot(slot - 1);
+        return turret.getInventory().getStackInSlot(slot - 1);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TurretContainer implements Container {
         if (slot == GUN_SLOT) {
             turret.setGunStack(stack);
         } else {
-            turret.setStackInSlot(slot - 1, stack);
+            turret.getInventory().setStackInSlot(slot - 1, stack);
         }
         setChanged();
     }

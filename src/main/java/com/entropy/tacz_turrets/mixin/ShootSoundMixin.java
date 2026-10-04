@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ShootSoundMixin {
     @Inject(method = "sendSoundToNearby", at = @At("HEAD"), cancellable = true, remap = false)
     private static void turretShootSound(LivingEntity sourceEntity, int distance, ResourceLocation gunId, ResourceLocation gunDisplayId, String soundName, float volume, float pitch, CallbackInfo ci) {
-        if (!TACZTurretsConfig.firstPersonShootSound || !(sourceEntity instanceof TurretEntity)) {
+        if (!TACZTurretsConfig.FIRST_PERSON_SHOOT_SOUND.get() || !(sourceEntity instanceof TurretEntity)) {
             return;
         }
         String replacement;

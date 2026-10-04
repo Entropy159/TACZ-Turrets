@@ -32,5 +32,6 @@
   "gui.tacz_turrets.allies.ally": "Ally",
   "gui.tacz_turrets.allies.empty": "No other players online.",
   "subtitles.tacz_turrets.turret_place": "Turret deployed",
-  "subtitles.tacz_turrets.turret_pickup": "Turret retrieved"
+  "subtitles.tacz_turrets.turret_pickup": "Turret retrieved",
+  "subtitles.tacz_turrets.turret_hurt": "Turret hurts"
 }

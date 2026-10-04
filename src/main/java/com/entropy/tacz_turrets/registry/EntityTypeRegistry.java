@@ -1,24 +1,21 @@
 package com.entropy.tacz_turrets.registry;
 
 import com.entropy.tacz_turrets.turret.TurretEntity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.entity.MobCategory;
+//? if forge {
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
-import net.minecraftforge.registries.RegistryObject;
+//?} else {
+/*import net.neoforged.neoforge.registries.DeferredRegister;
+*///?}
+
+import java.util.function.Supplier;
 
 import static com.entropy.tacz_turrets.TACZTurrets.MODID;
 
-@Mod.EventBusSubscriber
 public class EntityTypeRegistry {
-    public static final DeferredRegister<EntityType<?>> TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MODID);
+    public static final DeferredRegister<EntityType<?>> TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
 
-    public static final RegistryObject<EntityType<TurretEntity>> TURRET = TYPES.register("turret", () -> TurretEntity.TYPE);
-
-    @SubscribeEvent
-    public static void register(RegisterEvent event) {
-
-    }
+    public static final Supplier<EntityType<TurretEntity>> TURRET = TYPES.register("turret", () -> EntityType.Builder.<TurretEntity>of(TurretEntity::new, MobCategory.MISC).sized(1f, 1f).build("turret"));
 }

@@ -6,6 +6,7 @@ import com.entropy.tacz_turrets.turret.PlayerTargeting;
 import com.entropy.tacz_turrets.turret.TurretEnableType;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretMode;
+import com.entropy.tacz_turrets.util.Enums;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -49,7 +50,7 @@ public class TurretMenu extends AbstractContainerMenu {
     private final boolean canModify;
 
     public TurretMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buf) {
-        this(containerId, playerInventory, clientTurret(playerInventory, buf), new TurretLayout(buf.readByte(), buf.readByte()), buf.readUtf(), readAllies(buf), buf.readBoolean());
+        this(containerId, playerInventory, clientTurret(playerInventory, buf), new TurretLayout(buf.readByte(), buf.readByte()), buf.readUtf(), buf.readCollection(HashSet::new, in -> in.readUUID()), buf.readBoolean());
     }
 
     public TurretMenu(int containerId, Inventory playerInventory, @Nullable TurretEntity turret, TurretLayout layout, String ownerName, Set<UUID> allies, boolean canModify) {
@@ -62,36 +63,9 @@ public class TurretMenu extends AbstractContainerMenu {
         this.container = turret == null ? new SimpleContainer(layout.ammoSlots + 1) : new TurretContainer(turret, layout.ammoSlots);
         this.data = turret == null || playerInventory.player.level().isClientSide() ? new SimpleContainerData(DATA_SIZE) : new TurretMenuData(turret);
 
-        addSlot(new Slot(container, TurretContainer.GUN_SLOT, layout.gunSlotX, layout.gunSlotY) {
-            @Override
-            public boolean mayPlace(@NotNull ItemStack stack) {
-                return canModify && container.canPlaceItem(TurretContainer.GUN_SLOT, stack);
-            }
-
-            @Override
-            public boolean mayPickup(@NotNull Player player) {
-                return canModify;
-            }
-
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-        });
-
+        addSlot(new TurretSlot(TurretContainer.GUN_SLOT, layout.gunSlotX, layout.gunSlotY));
         for (int slot = 0; slot < layout.ammoSlots; slot++) {
-            int index = slot + 1;
-            addSlot(new Slot(container, index, layout.ammoSlotX(slot), layout.ammoSlotY(slot)) {
-                @Override
-                public boolean mayPlace(@NotNull ItemStack stack) {
-                    return canModify && container.canPlaceItem(index, stack);
-                }
-
-                @Override
-                public boolean mayPickup(@NotNull Player player) {
-                    return canModify;
-                }
-            });
+            addSlot(new TurretSlot(slot + 1, layout.ammoSlotX(slot), layout.ammoSlotY(slot)));
         }
 
         for (int row = 0; row < 3; row++) {
@@ -145,24 +119,15 @@ public class TurretMenu extends AbstractContainerMenu {
     }
 
     public TurretEnableType getEnableType() {
-        TurretEnableType[] values = TurretEnableType.values();
-        return values[Math.floorMod(data.get(DATA_ENABLE_TYPE), values.length)];
+        return Enums.byOrdinal(TurretEnableType.class, data.get(DATA_ENABLE_TYPE));
     }
 
     public PlayerTargeting getPlayerTargeting() {
-        PlayerTargeting[] values = PlayerTargeting.values();
-        return values[Math.floorMod(data.get(DATA_PLAYER_TARGETING), values.length)];
+        return Enums.byOrdinal(PlayerTargeting.class, data.get(DATA_PLAYER_TARGETING));
     }
 
     public String getOwnerName() {
         return ownerName;
-    }
-
-    private static Set<UUID> readAllies(FriendlyByteBuf buf) {
-        int size = buf.readVarInt();
-        Set<UUID> read = new HashSet<>();
-        for (int index = 0; index < size; index++) read.add(buf.readUUID());
-        return read;
     }
 
     public boolean canModify() {
@@ -178,26 +143,21 @@ public class TurretMenu extends AbstractContainerMenu {
     }
 
     public TurretMode getMode() {
-        TurretMode[] values = TurretMode.values();
-        return values[Math.floorMod(data.get(DATA_MODE), values.length)];
+        return Enums.byOrdinal(TurretMode.class, data.get(DATA_MODE));
     }
 
     @Override
     public boolean clickMenuButton(@NotNull Player player, int id) {
         if (turret == null || !turret.canInteract(player)) return false;
-        if (id == BUTTON_ENABLE_TYPE) {
-            turret.setEnableType(turret.getEnableType().next());
-            return true;
+        switch (id) {
+            case BUTTON_ENABLE_TYPE -> turret.setEnableType(Enums.next(turret.getEnableType()));
+            case BUTTON_MODE -> turret.setMode(Enums.next(turret.getMode()));
+            case BUTTON_PLAYER_TARGETING -> turret.setPlayerTargeting(Enums.next(turret.getPlayerTargeting()));
+            default -> {
+                return false;
+            }
         }
-        if (id == BUTTON_MODE) {
-            turret.setMode(turret.getMode().next());
-            return true;
-        }
-        if (id == BUTTON_PLAYER_TARGETING) {
-            turret.setPlayerTargeting(turret.getPlayerTargeting().next());
-            return true;
-        }
-        return false;
+        return true;
     }
 
     @Override
@@ -229,6 +189,27 @@ public class TurretMenu extends AbstractContainerMenu {
         return container.stillValid(player);
     }
 
+    private class TurretSlot extends Slot {
+        private TurretSlot(int index, int x, int y) {
+            super(TurretMenu.this.container, index, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(@NotNull ItemStack stack) {
+            return canModify && container.canPlaceItem(getContainerSlot(), stack);
+        }
+
+        @Override
+        public boolean mayPickup(@NotNull Player player) {
+            return canModify;
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return getContainerSlot() == TurretContainer.GUN_SLOT ? 1 : super.getMaxStackSize();
+        }
+    }
+
     private static class TurretMenuData implements ContainerData {
         private final TurretEntity turret;
 
@@ -247,7 +228,7 @@ public class TurretMenu extends AbstractContainerMenu {
                 case DATA_MAX_ENERGY_HIGH -> (turret.getMaxEnergyStored() >>> 16) & 0xFFFF;
                 case DATA_ENABLE_TYPE -> turret.getEnableType().ordinal();
                 case DATA_MODE -> turret.getMode().ordinal();
-                case DATA_USES_ENERGY -> TACZTurretsConfig.requireEnergy ? 1 : 0;
+                case DATA_USES_ENERGY -> TACZTurretsConfig.REQUIRE_ENERGY.get() ? 1 : 0;
                 case DATA_PLAYER_TARGETING -> turret.getPlayerTargeting().ordinal();
                 default -> 0;
             };

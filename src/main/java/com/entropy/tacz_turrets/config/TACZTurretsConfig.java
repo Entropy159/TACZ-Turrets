@@ -244,7 +244,7 @@ public class TACZTurretsConfig {
 
     public static final EnumValue<TurretModelType> MODEL_TYPE = CLIENT_BUILDER
             .comment("Change which model turrets use. Purely cosmetic.")
-            .defineEnum("modelType", TurretModelType.RETRO);
+            .defineEnum("modelType", TurretModelType.MODERN);
 
     public static final EnumValue<HealthBarStyle> HEALTH_BAR_STYLE = CLIENT_BUILDER
             .comment("Turret health bar style. GREEN_TO_RED fades green to orange to red as health drops, COLOR uses healthBarColor.")

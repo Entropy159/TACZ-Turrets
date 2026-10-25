@@ -1,0 +1,37 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "industrial",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/iron"
+      },
+      "count": 96
+    },
+    {
+      "item": {
+        "tag": "c:ingots/copper"
+      },
+      "count": 24
+    },
+    {
+      "item": {
+        "item": "minecraft:obsidian"
+      },
+      "count": 4
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "id": "tacz_turrets:industrial_turret"
+    }
+  }
+}

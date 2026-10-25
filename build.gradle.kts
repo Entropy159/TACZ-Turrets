@@ -22,6 +22,9 @@ repositories {
     maven("https://maven.neoforged.net/releases/")
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
     maven("https://dl.cloudsmith.io/public/tslat/sbl/maven/")
+    maven("https://maven.blamejared.com") {
+        content { includeGroup("mezz.jei") }
+    }
     maven("https://maven.ftb.dev/releases") {
         content { includeGroup("dev.ftb.mods") }
     }
@@ -52,6 +55,7 @@ dependencies {
     modImplementation(tacz)
     modCompileOnly("dev.ftb.mods:ftb-teams-$loader:${mod.dep("ftbteams")}") { isTransitive = false }
     modCompileOnly("maven.modrinth:open-parties-and-claims:${mod.dep("opac")}") { isTransitive = false }
+    modLocalRuntime("mezz.jei:jei-$minecraft-$loader:${mod.dep("jei")}") { isTransitive = false }
 
     val taczNested = layout.buildDirectory.dir("tacz-jarjar/${mod.dep("tacz")}").get().asFile
     if (!taczNested.resolve(".done").exists()) {
@@ -96,8 +100,9 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.processResources {
-    properties(listOf("META-INF/mods.toml", "META-INF/neoforge.mods.toml", "pack.mcmeta"),
+    properties(listOf("META-INF/mods.toml", "META-INF/neoforge.mods.toml", "pack.mcmeta", "assets/tacz_turrets/models/item/*.json", "assets/tacz_turrets/gunpack_info.json"),
         "id" to mod.id,
+        "loader" to loader,
         "name" to mod.name,
         "version" to mod.version,
         "authors" to mod.prop("authors"),

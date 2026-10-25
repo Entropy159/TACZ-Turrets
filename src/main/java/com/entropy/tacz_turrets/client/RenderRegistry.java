@@ -1,13 +1,10 @@
 package com.entropy.tacz_turrets.client;
 
-import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.client.renderer.TurretRenderer;
 import com.entropy.tacz_turrets.client.screen.TurretScreen;
-import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
 import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.registry.MenuRegistry;
-import net.minecraft.client.renderer.item.ItemProperties;
 //? if forge {
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,10 +18,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import com.entropy.tacz_turrets.client.renderer.TurretItemRenderer;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+
+import java.util.function.Supplier;
 *///?}
 
 import static com.entropy.tacz_turrets.TACZTurrets.MODID;
@@ -45,7 +47,6 @@ public class RenderRegistry {
         event.enqueueWork(() -> {
             //? if forge
             MenuScreens.register(MenuRegistry.TURRET.get(), TurretScreen::new);
-            ItemProperties.register(ItemRegistry.TURRET.get(), TACZTurrets.id("model"), (stack, level, entity, seed) -> TACZTurretsConfig.MODEL_TYPE.get().ordinal());
         });
         //? if neoforge
         /*ModList.get().getModContainerById(MODID).ifPresent(container -> container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new));*/
@@ -55,6 +56,11 @@ public class RenderRegistry {
     /*@SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(MenuRegistry.TURRET.get(), TurretScreen::new);
+    }
+
+    @SubscribeEvent
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(TurretItemRenderer.EXTENSIONS, ItemRegistry.TURRETS.values().stream().map(Supplier::get).toArray(Item[]::new));
     }
     *///?}
 }

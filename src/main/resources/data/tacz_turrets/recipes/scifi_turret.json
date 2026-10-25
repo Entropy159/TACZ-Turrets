@@ -1,0 +1,43 @@
+{
+  "conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "scifi",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/iron"
+      },
+      "count": 56
+    },
+    {
+      "item": {
+        "tag": "forge:ingots/gold"
+      },
+      "count": 16
+    },
+    {
+      "item": {
+        "tag": "forge:gems/quartz"
+      },
+      "count": 12
+    },
+    {
+      "item": {
+        "tag": "forge:gems/diamond"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "item": "tacz_turrets:scifi_turret"
+    }
+  }
+}

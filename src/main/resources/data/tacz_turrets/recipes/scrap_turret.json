@@ -1,0 +1,37 @@
+{
+  "conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "scrap",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/iron"
+      },
+      "count": 24
+    },
+    {
+      "item": {
+        "tag": "forge:ingots/copper"
+      },
+      "count": 16
+    },
+    {
+      "item": {
+        "tag": "minecraft:logs"
+      },
+      "count": 8
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "item": "tacz_turrets:scrap_turret"
+    }
+  }
+}

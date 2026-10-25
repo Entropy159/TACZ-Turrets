@@ -1,6 +1,6 @@
 package com.entropy.tacz_turrets.menu;
 
-import com.entropy.tacz_turrets.config.TACZTurretsConfig;
+import com.entropy.tacz_turrets.turret.TurretType;
 
 public class TurretLayout {
     public static final int SLOT = 18;
@@ -51,8 +51,8 @@ public class TurretLayout {
         this.height = hotbarY + SLOT + 7;
     }
 
-    public static TurretLayout fromConfig() {
-        return new TurretLayout(TACZTurretsConfig.TURRET_SLOT_ROWS.get(), TACZTurretsConfig.TURRET_SLOT_LENGTH.get());
+    public static TurretLayout forType(TurretType type) {
+        return new TurretLayout(type.stats().slotRows.get(), type.stats().slotLength.get());
     }
 
     public int ammoSlotX(int index) {

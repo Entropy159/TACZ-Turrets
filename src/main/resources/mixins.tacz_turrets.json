@@ -7,7 +7,13 @@
     "AmmoCheckMixin",
     "BulletProtectionMixin",
     "InaccuracyMixin",
-    "ShootSoundMixin"
+    "ReloadSpeedMixin",
+    "ShootSoundMixin",
+    "TurretWorkbenchBlockMixin"
+  ],
+  "client": [
+    "BlockModelShaperMixin",
+    "GunSmithTableScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

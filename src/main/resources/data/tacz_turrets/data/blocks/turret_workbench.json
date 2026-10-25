@@ -1,0 +1,12 @@
+{
+  "tabs": [
+    {
+      "id": "tacz_turrets:turrets",
+      "name": "tacz_turrets.tab.turrets",
+      "icon": {
+        "item": "tacz_turrets:modern_turret",
+        "id": "tacz_turrets:modern_turret"
+      }
+    }
+  ]
+}

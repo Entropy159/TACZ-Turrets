@@ -1,0 +1,28 @@
+{
+  "loader": "${loader}:separate_transforms",
+  "gui_light": "front",
+  "textures": {
+    "particle": "tacz_turrets:item/turret_industrial"
+  },
+  "base": {
+    "parent": "minecraft:item/generated",
+    "textures": {
+      "layer0": "tacz_turrets:item/turret_industrial"
+    }
+  },
+  "perspectives": {
+    "fixed": {
+      "parent": "minecraft:builtin/entity",
+      "textures": {
+        "particle": "tacz_turrets:item/turret_industrial"
+      },
+      "display": {
+        "fixed": {
+          "rotation": [0, 180, 0],
+          "translation": [0, -8, 0],
+          "scale": [1, 1, 1]
+        }
+      }
+    }
+  }
+}

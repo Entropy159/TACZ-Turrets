@@ -2,7 +2,6 @@ package com.entropy.tacz_turrets.client.model;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.client.renderer.TurretRenderer;
-import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretState;
 import net.minecraft.resources.ResourceLocation;
@@ -23,12 +22,12 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
 
     @Override
     public ResourceLocation getModelResource(TurretEntity animatable) {
-        return TACZTurretsConfig.MODEL_TYPE.get().model();
+        return animatable.getTurretType().model();
     }
 
     @Override
     public ResourceLocation getTextureResource(TurretEntity animatable) {
-        return TACZTurretsConfig.MODEL_TYPE.get().texture(TurretState.getState(animatable));
+        return animatable.getTurretType().texture(TurretState.getState(animatable));
     }
 
     @Override

@@ -1,0 +1,9 @@
+{
+  "version": "${version}",
+  "name": "pack.tacz_turrets.name",
+  "desc": "pack.tacz_turrets.desc",
+  "license": "${license}",
+  "authors": [
+    "${authors}"
+  ]
+}

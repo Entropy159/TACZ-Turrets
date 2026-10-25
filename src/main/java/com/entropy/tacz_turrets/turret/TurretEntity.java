@@ -31,6 +31,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -113,6 +114,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +142,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private static final EntityDataAccessor<Integer> RECOIL = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> CEILING = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private boolean gunDrawn = false;
     private TurretEnableType enableType = TurretEnableType.ALWAYS_ON;
     private TurretMode mode = TurretMode.AGGRESSIVE;
@@ -150,17 +153,18 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private int lastRepairTick = -100;
     private UUID retaliateTarget;
     private int retaliateTicks = 0;
-    private final ItemStackHandler inventory = new ItemStackHandler(Math.max(1, TACZTurretsConfig.TURRET_SLOT_ROWS.get() * TACZTurretsConfig.TURRET_SLOT_LENGTH.get()));
+    private final ItemStackHandler inventory = new ItemStackHandler(TurretLayout.forType(TurretType.MODERN).ammoSlots);
     private final List<ItemStack> overflow = new ArrayList<>();
     //? if forge
     private final LazyOptional<ItemStackHandler> lazyInventory = LazyOptional.of(() -> inventory);
-    private final TurretEnergyStorage energy = new TurretEnergyStorage(TACZTurretsConfig.ENERGY_CAPACITY.get(), TACZTurretsConfig.ENERGY_TRANSFER_RATE.get());
+    private final TurretEnergyStorage energy = new TurretEnergyStorage(TurretType.MODERN.stats().energyCapacity.get(), TurretType.MODERN.stats().energyTransferRate.get());
     //? if forge
     private final LazyOptional<TurretEnergyStorage> lazyEnergy = LazyOptional.of(() -> energy);
     public UUID owner;
 
-    public TurretEntity(Level level, BlockPos pos, Player player) {
+    public TurretEntity(Level level, BlockPos pos, Player player, TurretType type) {
         this(EntityTypeRegistry.TURRET.get(), level);
+        setTurretType(type);
         setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
         owner = player.getUUID();
         ownerName = player.getGameProfile().getName();
@@ -178,6 +182,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         entityData.define(STATE, TurretState.NO_GUN.ordinal());
         entityData.define(RECOIL, 0);
         entityData.define(CEILING, false);
+        entityData.define(TYPE, TurretType.MODERN.ordinal());
     }
     //?} else {
     /*protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
@@ -185,8 +190,23 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         builder.define(STATE, TurretState.NO_GUN.ordinal());
         builder.define(RECOIL, 0);
         builder.define(CEILING, false);
+        builder.define(TYPE, TurretType.MODERN.ordinal());
     }
     *///?}
+
+    public TurretType getTurretType() {
+        return Enums.byOrdinal(TurretType.class, entityData.get(TYPE));
+    }
+
+    public void setTurretType(TurretType type) {
+        entityData.set(TYPE, type.ordinal());
+        energy.setLimits(stats().energyCapacity.get(), stats().energyTransferRate.get());
+        resizeInventory();
+    }
+
+    public TACZTurretsConfig.TurretStats stats() {
+        return getTurretType().stats();
+    }
 
     public boolean isCeiling() {
         return entityData.get(CEILING);
@@ -240,7 +260,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     //?}
 
     public static AttributeSupplier.@NotNull Builder createLivingAttributes() {
-        return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, Math.max(TACZTurretsConfig.TURRET_RANGE.getDefault(), TACZTurretsConfig.SNIPER_TURRET_RANGE.getDefault())).add(Attributes.ARMOR, TACZTurretsConfig.TURRET_ARMOR.getDefault()).add(Attributes.MAX_HEALTH, TACZTurretsConfig.TURRET_HEALTH.getDefault());
+        return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, Arrays.stream(TurretType.values()).mapToInt(type -> type.defaultRange * 2).max().orElse(128)).add(Attributes.ARMOR, TurretType.MODERN.defaultArmor).add(Attributes.MAX_HEALTH, TurretType.MODERN.defaultHealth);
     }
 
     @Override
@@ -258,6 +278,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         tag.putString("OwnerName", ownerName);
         tag.putInt("Energy", energy.getEnergyStored());
         tag.putBoolean("Ceiling", isCeiling());
+        tag.putString("Type", getTurretType().name());
     }
 
     @Override
@@ -268,7 +289,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         //?} else {
         /*inventory.deserializeNBT(level().registryAccess(), tag.getCompound("Inventory"));
         *///?}
-        resizeInventory();
+        setTurretType(Enums.byName(tag.getString("Type"), TurretType.MODERN));
         if (tag.contains("Owner")) owner = tag.getUUID("Owner");
         enableType = Enums.byName(tag.getString("EnableType"), TurretEnableType.ALWAYS_ON);
         mode = Enums.byName(tag.getString("Mode"), TurretMode.AGGRESSIVE);
@@ -327,7 +348,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     public double getRange() {
-        return isSniper() ? TACZTurretsConfig.SNIPER_TURRET_RANGE.get() : TACZTurretsConfig.TURRET_RANGE.get();
+        return isSniper() ? stats().sniperRange.get() : stats().range.get();
     }
 
     public void tryShoot() {
@@ -339,7 +360,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             case SUCCESS -> {
                 lastShotTick = tickCount;
                 if (TACZTurretsConfig.TURRET_RECOIL.get()) entityData.set(RECOIL, RECOIL_TICKS);
-                if (TACZTurretsConfig.REQUIRE_ENERGY.get()) energy.consume(TACZTurretsConfig.ENERGY_PER_SHOT.get());
+                if (TACZTurretsConfig.REQUIRE_ENERGY.get()) energy.consume(stats().energyPerShot.get());
             }
             case NEED_BOLT -> gunOperator.bolt();
             case NO_AMMO -> {
@@ -363,12 +384,12 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     private float getInaccuracy() {
         return switch (TACZTurretsConfig.INACCURACY_MODE.get()) {
-            case RANDOM -> TACZTurretsConfig.RANDOM_INACCURACY.get().floatValue();
+            case RANDOM -> stats().randomInaccuracy.get().floatValue();
             case DISTANCE -> {
                 LivingEntity target = BrainUtils.getTargetOfEntity(this);
                 if (target == null) yield 0.0F;
                 double distance = Math.sqrt(distanceToSqr(target));
-                yield (float) (TACZTurretsConfig.DISTANCE_INACCURACY.get() * Math.min(1.0D, distance / getRange()));
+                yield (float) (stats().distanceInaccuracy.get() * Math.min(1.0D, distance / getRange()));
             }
         };
     }
@@ -456,13 +477,14 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     public boolean hasEnoughEnergy() {
         if (!TACZTurretsConfig.REQUIRE_ENERGY.get()) return true;
-        return energy.getEnergyStored() >= Math.max(1, TACZTurretsConfig.ENERGY_PER_SHOT.get());
+        return energy.getEnergyStored() >= Math.max(1, stats().energyPerShot.get());
     }
 
     private void tickEnergy() {
         if (!TACZTurretsConfig.REQUIRE_ENERGY.get()) return;
-        if (TACZTurretsConfig.ENERGY_IDLE_DRAIN.get() > 0 && !enableType.shouldDisable(level(), blockPosition())) {
-            energy.consume(TACZTurretsConfig.ENERGY_IDLE_DRAIN.get());
+        energy.setLimits(stats().energyCapacity.get(), stats().energyTransferRate.get());
+        if (stats().energyIdleDrain.get() > 0 && !enableType.shouldDisable(level(), blockPosition())) {
+            energy.consume(stats().energyIdleDrain.get());
         }
         collectEnergy();
     }
@@ -482,10 +504,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private void syncAttributes() {
-        if (getAttributeBaseValue(Attributes.ARMOR) != TACZTurretsConfig.TURRET_ARMOR.get()) getAttribute(Attributes.ARMOR).setBaseValue(TACZTurretsConfig.TURRET_ARMOR.get());
-        if (getAttributeBaseValue(Attributes.MAX_HEALTH) == TACZTurretsConfig.TURRET_HEALTH.get()) return;
+        if (getAttributeBaseValue(Attributes.ARMOR) != stats().armor.get()) getAttribute(Attributes.ARMOR).setBaseValue(stats().armor.get());
+        if (getAttributeBaseValue(Attributes.MAX_HEALTH) == stats().health.get()) return;
         float fraction = getHealth() / getMaxHealth();
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(TACZTurretsConfig.TURRET_HEALTH.get());
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(stats().health.get());
         setHealth(fraction * getMaxHealth());
     }
 
@@ -493,7 +515,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (!TACZTurretsConfig.PASSIVE_HEALING.get()) return;
         if (getHealth() >= getMaxHealth()) return;
         if (tickCount % TACZTurretsConfig.PASSIVE_HEAL_INTERVAL.get() != 0) return;
-        heal(TACZTurretsConfig.PASSIVE_HEAL_AMOUNT.get().floatValue());
+        heal(stats().passiveHealAmount.get().floatValue());
     }
 
     @Override
@@ -540,7 +562,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             dropOverflow();
             if (!isCeiling() && !onGround() && !level().getEntitiesOfClass(TurretEntity.class, getBoundingBox(), turret -> turret != this).isEmpty()) {
                 dropContents();
-                spawnAtLocation(new ItemStack(ItemRegistry.TURRET.get()));
+                spawnAtLocation(new ItemStack(ItemRegistry.turret(getTurretType())));
                 playTurretSound(SoundRegistry.TURRET_PICKUP.get());
                 discard();
                 return;
@@ -594,7 +616,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             if (result != null) return result;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            TurretLayout layout = TurretLayout.fromConfig();
+            TurretLayout layout = TurretLayout.forType(getTurretType());
             //? if forge {
             NetworkHooks.openScreen(serverPlayer, this, buf -> writeMenuData(buf, layout, manages));
             //?} else {
@@ -618,7 +640,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         ItemStack heldStack = player.getItemInHand(hand);
         if (!player.isCrouching() && TACZTurretsConfig.repairItems.matches(heldStack.getItem())) {
             if (getHealth() < getMaxHealth()) {
-                heal(TACZTurretsConfig.REPAIR_AMOUNT.get().floatValue());
+                heal(stats().repairAmount.get().floatValue());
                 if (!player.isCreative()) heldStack.shrink(1);
                 playRepairSound();
                 spawnRepairParticles();
@@ -634,7 +656,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             for (int slot = 0; slot < inventory.getSlots(); slot++) {
                 giveOrDrop(player, inventory.extractItem(slot, inventory.getStackInSlot(slot).getCount(), false), itemsToInventory);
             }
-            if (!player.isCreative()) giveOrDrop(player, new ItemStack(ItemRegistry.TURRET.get()), TACZTurretsConfig.PICKUP_TURRET_TO_INVENTORY.get());
+            if (!player.isCreative()) giveOrDrop(player, new ItemStack(ItemRegistry.turret(getTurretType())), TACZTurretsConfig.PICKUP_TURRET_TO_INVENTORY.get());
             playTurretSound(SoundRegistry.TURRET_PICKUP.get());
             discard();
             return InteractionResult.SUCCESS;
@@ -671,7 +693,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private void resizeInventory() {
-        int desired = Math.max(1, TACZTurretsConfig.TURRET_SLOT_ROWS.get() * TACZTurretsConfig.TURRET_SLOT_LENGTH.get());
+        int desired = TurretLayout.forType(getTurretType()).ammoSlots;
         if (inventory.getSlots() == desired) return;
         List<ItemStack> kept = new ArrayList<>();
         for (int slot = 0; slot < inventory.getSlots(); slot++) kept.add(inventory.getStackInSlot(slot));
@@ -695,7 +717,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-        return new TurretMenu(containerId, playerInventory, this, TurretLayout.fromConfig(), getOwnerName(), getAllies(), canInteract(player));
+        return new TurretMenu(containerId, playerInventory, this, TurretLayout.forType(getTurretType()), getOwnerName(), getAllies(), canInteract(player));
     }
 
     public boolean canInteract(Player player) {
@@ -813,7 +835,12 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(ItemRegistry.TURRET.get());
+        return new ItemStack(ItemRegistry.turret(getTurretType()));
+    }
+
+    @Override
+    protected @NotNull Component getTypeName() {
+        return ItemRegistry.turret(getTurretType()).getDescription();
     }
 
     @Override
@@ -912,7 +939,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     public List<? extends ExtendedSensor<? extends TurretEntity>> getSensors() {
-        int range = Math.max(TACZTurretsConfig.TURRET_RANGE.get(), TACZTurretsConfig.SNIPER_TURRET_RANGE.get());
+        int range = TACZTurretsConfig.maxRange();
         return ObjectArrayList.of(new NearbyPlayersSensor<TurretEntity>().setRadius(range).setPredicate((p, e) -> e.lastHurtByPlayer != null && p.getUUID().equals(e.lastHurtByPlayer.getUUID()) && e.isValidTarget(p)), new HurtBySensor<>(), new NearbyLivingEntitySensor<TurretEntity>().setRadius(range).setPredicate((target, entity) -> shouldTarget(target)));
     }
 

@@ -1,0 +1,8 @@
+{
+  "name": "block.tacz_turrets.turret_workbench",
+  "display": "tacz_turrets:turret_workbench",
+  "data": "tacz_turrets:turret_workbench",
+  "tooltip": "block.tacz_turrets.turret_workbench.desc",
+  "id": "tacz:workbench_b",
+  "sort": 10
+}

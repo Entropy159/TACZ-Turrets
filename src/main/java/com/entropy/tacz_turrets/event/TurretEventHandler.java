@@ -2,8 +2,10 @@ package com.entropy.tacz_turrets.event;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
+import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.turret.RetaliateTargeting;
 import com.entropy.tacz_turrets.turret.TurretEntity;
+import com.entropy.tacz_turrets.turret.TurretType;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +16,9 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.MissingMappingsEvent;
 //?} else {
 /*import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -31,6 +36,15 @@ import java.util.List;
 /*@EventBusSubscriber(modid = TACZTurrets.MODID)
 *///?}
 public class TurretEventHandler {
+    //? if forge {
+    @SubscribeEvent
+    public static void onMissingMappings(MissingMappingsEvent event) {
+        for (MissingMappingsEvent.Mapping<Item> mapping : event.getMappings(ForgeRegistries.Keys.ITEMS, TACZTurrets.MODID)) {
+            if (mapping.getKey().getPath().equals("turret")) mapping.remap(ItemRegistry.turret(TurretType.MODERN));
+        }
+    }
+    //?}
+
     @SubscribeEvent
     //? if forge {
     public static void onLivingAttack(LivingAttackEvent event) {
@@ -72,7 +86,7 @@ public class TurretEventHandler {
         if (TACZTurretsConfig.RETALIATE_TARGETING.get() != RetaliateTargeting.CLEAR_ON_DEATH) return;
         if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
 
-        double range = Math.max(TACZTurretsConfig.TURRET_RANGE.get(), TACZTurretsConfig.SNIPER_TURRET_RANGE.get());
+        double range = TACZTurretsConfig.maxRange();
         for (TurretEntity turret : player.level().getEntitiesOfClass(TurretEntity.class, AABB.ofSize(player.position(), range * 2, range * 2, range * 2))) {
             turret.forgetRetaliation(player.getUUID());
         }
@@ -87,8 +101,8 @@ public class TurretEventHandler {
 
     private static void defendOwner(Player owner, LivingEntity attacker) {
         if (attacker == owner) return;
-        double range = TACZTurretsConfig.TURRET_RANGE.get();
-        List<TurretEntity> turrets = owner.level().getEntitiesOfClass(TurretEntity.class, AABB.ofSize(owner.position(), range * 2, range, range * 2), turret -> owner.getUUID().equals(turret.owner));
+        double range = TACZTurretsConfig.maxRange();
+        List<TurretEntity> turrets = owner.level().getEntitiesOfClass(TurretEntity.class, AABB.ofSize(owner.position(), range * 2, range, range * 2), turret -> owner.getUUID().equals(turret.owner) && turret.distanceTo(owner) <= turret.stats().range.get());
         for (TurretEntity turret : turrets) {
             if (attacker instanceof Player player) turret.markRetaliation(player);
             if (turret.isValidTarget(attacker)) turret.alertTo(attacker);

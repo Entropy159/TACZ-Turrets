@@ -16,6 +16,12 @@ public class TurretEnergyStorage extends EnergyStorage {
         energy = Math.max(0, energy - amount);
     }
 
+    public void setLimits(int capacity, int maxReceive) {
+        this.capacity = capacity;
+        this.maxReceive = maxReceive;
+        energy = Math.min(energy, capacity);
+    }
+
     public void setEnergy(int amount) {
         energy = Mth.clamp(amount, 0, capacity);
     }

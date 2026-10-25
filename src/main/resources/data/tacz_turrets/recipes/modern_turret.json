@@ -1,0 +1,36 @@
+{
+  "conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "modern"
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/iron"
+      },
+      "count": 48
+    },
+    {
+      "item": {
+        "tag": "forge:ingots/gold"
+      },
+      "count": 8
+    },
+    {
+      "item": {
+        "tag": "forge:dusts/redstone"
+      },
+      "count": 8
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "item": "tacz_turrets:modern_turret"
+    }
+  }
+}

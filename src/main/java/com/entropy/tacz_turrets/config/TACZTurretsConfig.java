@@ -5,7 +5,7 @@ import com.entropy.tacz_turrets.turret.HealthBarStyle;
 import com.entropy.tacz_turrets.turret.InaccuracyMode;
 import com.entropy.tacz_turrets.turret.RecoilType;
 import com.entropy.tacz_turrets.turret.RetaliateTargeting;
-import com.entropy.tacz_turrets.turret.TurretModelType;
+import com.entropy.tacz_turrets.turret.TurretType;
 import com.entropy.tacz_turrets.util.RegistryFilter;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -35,6 +35,7 @@ import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
 import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
 *///?}
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -50,33 +51,9 @@ public class TACZTurretsConfig {
             .comment("Whether turrets need ammo.")
             .define("consumeAmmo", true);
 
-    public static final IntValue TURRET_RANGE = BUILDER
-            .comment("Turret detection and engagement range in blocks.")
-            .defineInRange("turretRange", 64, 8, 1000);
-
-    public static final IntValue SNIPER_TURRET_RANGE = BUILDER
-            .comment("Turret range for sniper guns.")
-            .defineInRange("sniperTurretRange", 128, 8, 1000);
-
     public static final ConfigValue<List<? extends String>> SNIPER_GUN_TYPES = BUILDER
             .comment("Gun types that use the sniper range.")
             .defineList("sniperGunTypes", List.of("sniper"), entry -> entry instanceof String type && !type.isBlank());
-
-    public static final IntValue TURRET_HEALTH = BUILDER
-            .comment("Health of turret.")
-            .defineInRange("turretHealth", 200, 10, 1000);
-
-    public static final DoubleValue TURRET_ARMOR = BUILDER
-            .comment("Armor points of turrets.")
-            .defineInRange("turretArmor", 6.0D, 0.0D, 1000.0D);
-
-    public static final IntValue TURRET_SLOT_ROWS = BUILDER
-            .comment("Rows of ammo slots in the turret screen.")
-            .defineInRange("turretSlotRows", 2, 1, 6);
-
-    public static final IntValue TURRET_SLOT_LENGTH = BUILDER
-            .comment("Ammo slots per row in the turret screen.")
-            .defineInRange("turretSlotLength", 5, 1, 9);
 
     public static final BooleanValue TURRETS_TAKE_DAMAGE = BUILDER
             .comment("If false, turrets will be immune to damage.")
@@ -121,14 +98,6 @@ public class TACZTurretsConfig {
     public static final EnumValue<InaccuracyMode> INACCURACY_MODE = BUILDER
             .comment("How turret inaccuracy is calculated. DISTANCE gets less accurate the further away the target is, RANDOM is the same at any range.")
             .defineEnum("inaccuracyMode", InaccuracyMode.DISTANCE);
-
-    public static final DoubleValue DISTANCE_INACCURACY = BUILDER
-            .comment("Distance inaccuracy at maximum range. 0 always hits.")
-            .defineInRange("distanceInaccuracy", 1.0D, 0.0D, 45.0D);
-
-    public static final DoubleValue RANDOM_INACCURACY = BUILDER
-            .comment("Random inaccuracy. 0 always hits.")
-            .defineInRange("randomInaccuracy", 1.0D, 0.0D, 45.0D);
 
     public static final IntValue ADAPTIVE_RANGE = BUILDER
             .comment("Distance at which adaptive mode switches from conserving ammo to firing freely.")
@@ -210,10 +179,6 @@ public class TACZTurretsConfig {
             .comment("Passive healing.")
             .define("passiveHealing", false);
 
-    public static final DoubleValue PASSIVE_HEAL_AMOUNT = BUILDER
-            .comment("Passive healing amount.")
-            .defineInRange("passiveHealAmount", 1.0D, 0.0D, 1000.0D);
-
     public static final IntValue PASSIVE_HEAL_INTERVAL = BUILDER
             .comment("Passive healing frequency in ticks.")
             .defineInRange("passiveHealInterval", 100, 1, 72000);
@@ -222,41 +187,91 @@ public class TACZTurretsConfig {
             .comment("Items that can repair turrets. Accepts item ids and #item tags.")
             .defineList("repairItems", List.of("minecraft:iron_bars"), RegistryFilter::isValidEntry);
 
-    public static final DoubleValue REPAIR_AMOUNT = BUILDER
-            .comment("Health restored per repair item.")
-            .defineInRange("repairAmount", 25.0D, 0.0D, 1000.0D);
-
     public static final BooleanValue REQUIRE_ENERGY = BUILDER
             .comment("Turrets need FE to run.")
             .define("requireEnergy", false);
 
-    public static final IntValue ENERGY_CAPACITY = BUILDER
-            .comment("Energy buffer size.")
-            .defineInRange("energyCapacity", 10000, 1, 1000000000);
+    //? if forge {
+    public static final BooleanValue IDENTICAL_TURRETS = BUILDER
+    //?} else {
+    /*private static final Builder COMMON_BUILDER = new Builder();
 
-    public static final IntValue ENERGY_TRANSFER_RATE = BUILDER
-            .comment("Energy accepted per tick.")
-            .defineInRange("energyTransferRate", 200, 1, 1000000000);
+    public static final BooleanValue IDENTICAL_TURRETS = COMMON_BUILDER
+    *///?}
+            .comment("All turrets use the modern turret's stats and recipe, so turret types only change the look.")
+            .define("identicalTurrets", true);
 
-    public static final IntValue ENERGY_PER_SHOT = BUILDER
-            .comment("Energy used per shot.")
-            .defineInRange("energyPerShot", 10, 0, 1000000);
+    private static final TurretStats[] STATS = Arrays.stream(TurretType.values()).map(TurretStats::new).toArray(TurretStats[]::new);
 
-    public static final IntValue ENERGY_IDLE_DRAIN = BUILDER
-            .comment("Energy used per tick.")
-            .defineInRange("energyIdleDrain", 1, 0, 1000000);
+    public static TurretStats stats(TurretType type) {
+        return STATS[IDENTICAL_TURRETS.get() ? TurretType.MODERN.ordinal() : type.ordinal()];
+    }
+
+    public static boolean enabled(TurretType type) {
+        return STATS[type.ordinal()].enabled.get();
+    }
+
+    public static int maxRange() {
+        int range = 0;
+        for (TurretType type : TurretType.values()) range = Math.max(range, Math.max(stats(type).range.get(), stats(type).sniperRange.get()));
+        return range;
+    }
+
+    public static final class TurretStats {
+        public final BooleanValue enabled;
+        public final IntValue health;
+        public final DoubleValue armor;
+        public final IntValue range;
+        public final IntValue sniperRange;
+        public final DoubleValue distanceInaccuracy;
+        public final DoubleValue randomInaccuracy;
+        public final DoubleValue reloadSpeed;
+        public final IntValue slotRows;
+        public final IntValue slotLength;
+        public final IntValue energyCapacity;
+        public final IntValue energyTransferRate;
+        public final IntValue energyPerShot;
+        public final IntValue energyIdleDrain;
+        public final DoubleValue passiveHealAmount;
+        public final DoubleValue repairAmount;
+
+        private TurretStats(TurretType type) {
+            //? if forge {
+            BUILDER.push(type.id());
+            enabled = BUILDER.comment("Whether this turret can be crafted and placed.").define("enabled", true);
+            //?} else {
+            /*COMMON_BUILDER.push(type.id());
+            enabled = COMMON_BUILDER.comment("Whether this turret can be crafted and placed.").define("enabled", true);
+            COMMON_BUILDER.pop();
+            BUILDER.push(type.id());
+            *///?}
+            health = BUILDER.comment("Health of the turret.").defineInRange("health", type.defaultHealth, 10, 1000);
+            armor = BUILDER.comment("Armor points of the turret.").defineInRange("armor", type.defaultArmor, 0.0D, 1000.0D);
+            range = BUILDER.comment("Detection and engagement range in blocks.").defineInRange("range", type.defaultRange, 8, 1000);
+            sniperRange = BUILDER.comment("Range for sniper guns.").defineInRange("sniperRange", type.defaultRange * 2, 8, 1000);
+            distanceInaccuracy = BUILDER.comment("Distance inaccuracy at maximum range. 0 always hits.").defineInRange("distanceInaccuracy", type.defaultInaccuracy, 0.0D, 45.0D);
+            randomInaccuracy = BUILDER.comment("Random inaccuracy. 0 always hits.").defineInRange("randomInaccuracy", type.defaultInaccuracy, 0.0D, 45.0D);
+            reloadSpeed = BUILDER.comment("Reload speed multiplier. 1.0 is the gun's normal speed.").defineInRange("reloadSpeed", type.defaultReloadSpeed, 1.0D, 10.0D);
+            slotRows = BUILDER.comment("Rows of ammo slots in the turret screen.").defineInRange("slotRows", 2, 1, 6);
+            slotLength = BUILDER.comment("Ammo slots per row in the turret screen.").defineInRange("slotLength", 5, 1, 9);
+            energyCapacity = BUILDER.comment("Energy buffer size.").defineInRange("energyCapacity", 10000, 1, 1000000000);
+            energyTransferRate = BUILDER.comment("Energy accepted per tick.").defineInRange("energyTransferRate", 200, 1, 1000000000);
+            energyPerShot = BUILDER.comment("Energy used per shot.").defineInRange("energyPerShot", 10, 0, 1000000);
+            energyIdleDrain = BUILDER.comment("Energy used per tick.").defineInRange("energyIdleDrain", 1, 0, 1000000);
+            passiveHealAmount = BUILDER.comment("Passive healing amount.").defineInRange("passiveHealAmount", 1.0D, 0.0D, 1000.0D);
+            repairAmount = BUILDER.comment("Health restored per repair item.").defineInRange("repairAmount", 25.0D, 0.0D, 1000.0D);
+            BUILDER.pop();
+        }
+    }
 
     //? if forge {
     public static final ForgeConfigSpec SPEC = BUILDER.build();
     //?} else {
     /*public static final ModConfigSpec SPEC = BUILDER.build();
+    public static final ModConfigSpec COMMON_SPEC = COMMON_BUILDER.build();
     *///?}
 
     private static final Builder CLIENT_BUILDER = new Builder();
-
-    public static final EnumValue<TurretModelType> MODEL_TYPE = CLIENT_BUILDER
-            .comment("Change which model turrets use. Purely cosmetic.")
-            .defineEnum("modelType", TurretModelType.MODERN);
 
     public static final EnumValue<HealthBarStyle> HEALTH_BAR_STYLE = CLIENT_BUILDER
             .comment("Turret health bar style. GREEN_TO_RED fades green to orange to red as health drops, COLOR uses healthBarColor.")

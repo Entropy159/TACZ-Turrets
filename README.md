@@ -50,16 +50,26 @@ Turrets do not target their owner or the owner's allies. Allies come from:
 
 Allies can also open and manage your turrets. Turn that off with `alliesHavePerms`.
 
-## Turret models
+## Turrets
 
-Each player can pick how turrets look for them with `modelType` in `tacz_turrets-client.toml`. This is purely cosmetic.
+Turrets are crafted at the Turret Workbench. By default, they all use the Modern turret's stats and recipe. Turn off `identicalTurrets` to use the stats below.
+
+| Turret | Health | Armor | Range | Reload | Role |
+| --- | --- | --- | --- | --- | --- |
+| Scrap | 120 | 2 | 48 | 1x | Cheap, inaccurate |
+| Modern | 200 | 6 | 64 | 1x | All-rounder |
+| Industrial | 300 | 10 | 56 | 1.1x | Tough, less accurate |
+| Sci-Fi | 180 | 4 | 80 | 1.15x | Long range, accurate |
+| Tactical | 220 | 8 | 72 | 1.25x | Long range, accurate |
+
+Sniper guns double a turret's range.
 
 ## Config
 
-- `tacz_turrets-common.toml` on 1.20.1, or `tacz_turrets-server.toml` in each world's `serverconfig` folder on 1.21.1: range, health, armor, ammo use, accuracy, who turrets target and can damage, repair items, healing, sounds, and FE power (off by default; turrets pull FE from the block they stand on when it's on).
-- `tacz_turrets-client.toml`: turret model, health bar style and color and recoil animation.
+- Server: Ammo use, what turrets can target, repair items, healing, sounds, and FE power (off by default; turrets pull FE from the block under them). Each turret has its own section for health, armor, range, accuracy, ammo slots, energy use and healing. Each turret can also be switched off.
+- Client: Health bar style and color and recoil animation.
 
-The entity tags `tacz_turrets:turret_targets` and `tacz_turrets:turret_ignored` add mobs turrets always or never target.
+The entity tags `tacz_turrets:turret_targets` and `tacz_turrets:turret_ignored` can be used for what turrets will or will not target.
 
 ## Building
 

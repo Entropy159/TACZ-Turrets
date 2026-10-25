@@ -1,36 +1,30 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tacz_turrets:item/turret"
+    "layer0": "tacz_turrets:item/turret_modern"
   },
   "overrides": [
     {
       "predicate": {
         "tacz_turrets:model": 1
       },
-      "model": "tacz_turrets:item/turret_modern"
+      "model": "tacz_turrets:item/turret_industrial"
     },
     {
       "predicate": {
         "tacz_turrets:model": 2
       },
-      "model": "tacz_turrets:item/turret_industrial"
+      "model": "tacz_turrets:item/turret_scifi"
     },
     {
       "predicate": {
         "tacz_turrets:model": 3
       },
-      "model": "tacz_turrets:item/turret_scifi"
-    },
-    {
-      "predicate": {
-        "tacz_turrets:model": 4
-      },
       "model": "tacz_turrets:item/turret_scrap"
     },
     {
       "predicate": {
-        "tacz_turrets:model": 5
+        "tacz_turrets:model": 4
       },
       "model": "tacz_turrets:item/turret_tactical"
     }

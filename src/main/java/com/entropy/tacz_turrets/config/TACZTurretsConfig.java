@@ -82,6 +82,18 @@ public class TACZTurretsConfig {
             .comment("If false, turrets will be immune to damage.")
             .define("turretsTakeDamage", true);
 
+    public static final BooleanValue DROP_ITEMS_ON_DEATH = BUILDER
+            .comment("Destroyed turrets drop their gun and ammo.")
+            .define("dropItemsOnDeath", true);
+
+    public static final BooleanValue PICKUP_ITEMS_TO_INVENTORY = BUILDER
+            .comment("Picking up a turret puts its gun and ammo in your inventory. If false, they drop on the ground.")
+            .define("pickupItemsToInventory", true);
+
+    public static final BooleanValue PICKUP_TURRET_TO_INVENTORY = BUILDER
+            .comment("Picking up a turret puts the turret in your inventory. If false, it drops on the ground.")
+            .define("pickupTurretToInventory", true);
+
     public static final ConfigValue<List<? extends String>> EFFECT_BLACKLIST = BUILDER
             .comment("Effects turrets are immune to. Accepts effect ids and #effect tags.")
             .defineList("effectBlacklist", List.of("minecraft:poison", "minecraft:wither", "minecraft:weakness", "minecraft:blindness", "minecraft:darkness", "minecraft:hunger", "minecraft:mining_fatigue", "minecraft:nausea", "minecraft:slowness"), RegistryFilter::isValidEntry);

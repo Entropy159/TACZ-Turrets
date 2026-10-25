@@ -627,20 +627,14 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             return InteractionResult.SUCCESS;
         }
         if (player.isCrouching()) {
+            boolean itemsToInventory = TACZTurretsConfig.PICKUP_ITEMS_TO_INVENTORY.get();
             ItemStack gunStack = getGunStack();
             setGunStack(ItemStack.EMPTY);
-            if (!gunStack.isEmpty() && !player.getInventory().add(gunStack)) {
-                spawnAtLocation(gunStack);
-            }
+            giveOrDrop(player, gunStack, itemsToInventory);
             for (int slot = 0; slot < inventory.getSlots(); slot++) {
-                ItemStack slotStack = inventory.extractItem(slot, inventory.getStackInSlot(slot).getCount(), false);
-                if (!slotStack.isEmpty() && !player.getInventory().add(slotStack)) {
-                    spawnAtLocation(slotStack);
-                }
+                giveOrDrop(player, inventory.extractItem(slot, inventory.getStackInSlot(slot).getCount(), false), itemsToInventory);
             }
-            if (!player.isCreative()) {
-                player.getInventory().add(new ItemStack(ItemRegistry.TURRET.get()));
-            }
+            if (!player.isCreative()) giveOrDrop(player, new ItemStack(ItemRegistry.TURRET.get()), TACZTurretsConfig.PICKUP_TURRET_TO_INVENTORY.get());
             playTurretSound(SoundRegistry.TURRET_PICKUP.get());
             discard();
             return InteractionResult.SUCCESS;
@@ -649,6 +643,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             return InteractionResult.SUCCESS;
         }
         return null;
+    }
+
+    private void giveOrDrop(Player player, ItemStack stack, boolean toInventory) {
+        if (!stack.isEmpty() && (!toInventory || !player.getInventory().add(stack))) spawnAtLocation(stack);
     }
 
     public void playTurretSound(SoundEvent sound) {
@@ -758,7 +756,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     //?} else {
     /*protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NotNull DamageSource source, boolean recentlyHit) {
     *///?}
-        dropContents();
+        if (TACZTurretsConfig.DROP_ITEMS_ON_DEATH.get()) dropContents();
     }
 
     private void dropContents() {

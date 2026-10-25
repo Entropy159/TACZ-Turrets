@@ -36,7 +36,7 @@ The status light shows what the turret is doing:
 | Yellow | Reloading |
 | Bright red | Out of ammo |
 | Dark red | No gun |
-| Off | Switched off |
+| Gray | Switched off |
 
 ## Allies
 

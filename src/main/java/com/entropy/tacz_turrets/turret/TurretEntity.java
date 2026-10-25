@@ -720,7 +720,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public void onInventoryChanged() {
         gunDrawn = false;
         if (level() instanceof ServerLevel serverLevel) {
-            serverLevel.getChunkSource().broadcastAndSend(this, new ClientboundSetEquipmentPacket(getId(), List.of(Pair.of(EquipmentSlot.MAINHAND, getMainHandItem()))));
+            serverLevel.getChunkSource().broadcastAndSend(this, new ClientboundSetEquipmentPacket(getId(), List.of(Pair.of(EquipmentSlot.MAINHAND, getMainHandItem().copy()))));
         }
     }
 

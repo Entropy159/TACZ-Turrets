@@ -15,8 +15,10 @@ Turrets that fire guns from [TACZ](https://www.curseforge.com/minecraft/mc-mods/
 ## Controls
 
 - **Place it** by right-clicking a block. Use the bottom of a block to hang the turret upside down from the ceiling.
-- **Open it** by right-clicking the turret. Put a gun in the gun slot and ammo in the slots below it.
-- **Pick it up** by crouching and right-clicking. You get the turret back with its gun and ammo.
+- **Open it** by right-clicking the turret. Put a gun in the gun slot, ammo in the slots below it, and a TACZ laser sight next to the gun slot.
+- **Pick it up** by crouching and right-clicking. You get the turret back with its gun, laser and ammo.
+- **Paint it** by crouching and right-clicking with a dye or a banner. A dye recolors the turret's panels, and a banner puts its design on each panel. The paint stays on the turret when you pick it up. Crouch and right-click with an axe to scrape it off.
+- **Camo it** the same way with a camo from the Camos tab of the Turret Workbench. A camo covers the whole turret except its status light. Scraping it off with an axe removes it.
 - **Repair it** by right-clicking with iron bars.
 
 A turret standing on a chest, barrel or any other item storage takes matching ammo from it when it runs out.
@@ -66,8 +68,8 @@ Sniper guns double a turret's range.
 
 ## Config
 
-- Server: Ammo use, what turrets can target, repair items, healing, sounds, and FE power (off by default; turrets pull FE from the block under them). Each turret has its own section for health, armor, range, accuracy, ammo slots, energy use and healing. Each turret can also be switched off.
-- Client: Health bar style and color and recoil animation.
+- Server: Ammo use, what turrets can target, repair items, healing, sounds, whether scraped camos come back, and FE power (off by default; turrets pull FE from the block under them). Each turret has its own section for health, armor, range, accuracy, ammo slots, energy use and healing. Each turret can also be switched off.
+- Client: Health bar style and color, recoil animation, and whether a turret with no gun still shows its laser.
 
 The entity tags `tacz_turrets:turret_targets` and `tacz_turrets:turret_ignored` can be used for what turrets will or will not target.
 

@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class TurretContainer implements Container {
     public static final int GUN_SLOT = 0;
+    public static final int LASER_SLOT = 1;
+    public static final int FIRST_AMMO_SLOT = 2;
 
     private final TurretEntity turret;
     private final int ammoSlots;
@@ -23,7 +25,7 @@ public class TurretContainer implements Container {
 
     @Override
     public int getContainerSize() {
-        return ammoSlots + 1;
+        return ammoSlots + FIRST_AMMO_SLOT;
     }
 
     @Override
@@ -37,7 +39,8 @@ public class TurretContainer implements Container {
     @Override
     public @NotNull ItemStack getItem(int slot) {
         if (slot == GUN_SLOT) return turret.getGunStack();
-        return turret.getInventory().getStackInSlot(slot - 1);
+        if (slot == LASER_SLOT) return turret.getLaserStack();
+        return turret.getInventory().getStackInSlot(slot - FIRST_AMMO_SLOT);
     }
 
     @Override
@@ -60,8 +63,10 @@ public class TurretContainer implements Container {
     public void setItem(int slot, @NotNull ItemStack stack) {
         if (slot == GUN_SLOT) {
             turret.setGunStack(stack);
+        } else if (slot == LASER_SLOT) {
+            turret.setLaserStack(stack);
         } else {
-            turret.getInventory().setStackInSlot(slot - 1, stack);
+            turret.getInventory().setStackInSlot(slot - FIRST_AMMO_SLOT, stack);
         }
         setChanged();
     }
@@ -86,6 +91,7 @@ public class TurretContainer implements Container {
     @Override
     public boolean canPlaceItem(int slot, @NotNull ItemStack stack) {
         if (slot == GUN_SLOT) return turret.isGun(stack);
+        if (slot == LASER_SLOT) return turret.isLaser(stack);
         return turret.canAcceptAmmo(stack);
     }
 }

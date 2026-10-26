@@ -1,23 +1,41 @@
 package com.entropy.tacz_turrets.client.renderer;
 
 import com.entropy.tacz_turrets.client.model.TurretModel;
+import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.turret.TurretEntity;
+import com.entropy.tacz_turrets.turret.TurretState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.tacz.guns.api.TimelessAPI;
+import com.tacz.guns.api.item.IAttachment;
+import com.tacz.guns.client.model.functional.BeamRenderer;
+import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
+import com.tacz.guns.client.resource.pojo.display.LaserConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
+import java.util.List;
+
 public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
     public TurretRenderer(EntityRendererProvider.Context context) {
         super(context, new TurretModel());
+        addRenderLayer(new TurretPaintLayer(this));
         addRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
@@ -68,6 +86,30 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
             Minecraft.getInstance().getItemRenderer().renderStatic(turret.getGunStack(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, packedLight, packedOverlay, poseStack, bufferSource, turret.level(), 0);
         }
 
+        poseStack.popPose();
+
+        TurretState state = TurretState.getState(turret);
+        if (turret.isAlive() && turret.hasLaser() && state != TurretState.DISABLED && (state != TurretState.NO_GUN || TACZTurretsConfig.LASER_WITHOUT_GUN.get())) {
+            model.getBone("laser").ifPresent(laser -> renderLaser(turret, new Matrix4f(entityRenderTranslations).invert().mul(modelRenderTranslations).mul(laser.getModelSpaceMatrix()), poseStack, partialTick));
+        }
+    }
+
+    private static void renderLaser(TurretEntity turret, Matrix4f bone, PoseStack poseStack, float partialTick) {
+        ItemStack laser = turret.getLaserStack();
+        LaserConfig config = TimelessAPI.getClientAttachmentIndex(IAttachment.getIAttachmentOrNull(laser).getAttachmentId(laser)).map(ClientAttachmentIndex::getLaserConfig).orElse(null);
+        if (config == null || config.getLengthThird() <= 0) return;
+
+        Vector3f forward = bone.transformDirection(new Vector3f(0, 0, -1));
+        Vec3 start = turret.getPosition(partialTick).add(new Vec3(bone.transformPosition(new Vector3f())));
+        Vec3 end = start.add(new Vec3(forward).scale(config.getLengthThird() / forward.length()));
+        Vec3 stop = turret.level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, turret)).getLocation();
+        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(turret.level(), turret, start, stop, new AABB(start, stop).inflate(1), entity -> !entity.isSpectator() && entity.isPickable());
+        if (entityHit != null) stop = entityHit.getLocation();
+
+        poseStack.pushPose();
+        poseStack.last().pose().mul(bone);
+        poseStack.scale(1, 1, (float) (start.distanceTo(stop) / forward.length()) / config.getLengthThird());
+        BeamRenderer.renderLaserBeam(laser, poseStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, List.of());
         poseStack.popPose();
     }
 }

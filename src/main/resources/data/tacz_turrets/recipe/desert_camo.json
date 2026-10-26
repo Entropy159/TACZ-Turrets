@@ -1,0 +1,36 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "item": "minecraft:paper"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "minecraft:sand"
+      },
+      "count": 4
+    },
+    {
+      "item": {
+        "item": "minecraft:yellow_dye"
+      },
+      "count": 1
+    },
+    {
+      "item": {
+        "item": "minecraft:brown_dye"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:camos",
+    "item": {
+      "id": "tacz_turrets:desert_camo"
+    }
+  }
+}

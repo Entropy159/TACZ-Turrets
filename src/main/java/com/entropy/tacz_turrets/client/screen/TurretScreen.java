@@ -185,7 +185,7 @@ public class TurretScreen extends AbstractContainerScreen<TurretMenu> {
     }
 
     private int allyButtonX() {
-        return layout.gunSlotX + TurretLayout.SLOT + 6;
+        return layout.laserSlotX + TurretLayout.SLOT + 6;
     }
 
     private int allyButtonWidth() {

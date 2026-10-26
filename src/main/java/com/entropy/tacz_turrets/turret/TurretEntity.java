@@ -4,6 +4,7 @@ import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.compat.FTBTeamsCompat;
 import com.entropy.tacz_turrets.compat.OpenPACCompat;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
+import com.entropy.tacz_turrets.item.CamoItem;
 import com.entropy.tacz_turrets.menu.TurretLayout;
 import com.entropy.tacz_turrets.menu.TurretMenu;
 import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
@@ -20,7 +21,9 @@ import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ShootResult;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
+import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.init.ModItems;
 import com.tacz.guns.item.ModernKineticGunItem;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
@@ -31,6 +34,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -42,6 +46,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.valueproviders.ConstantFloat;
@@ -62,6 +67,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -78,7 +86,9 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 //?} else {
-/*import net.minecraft.world.level.Explosion;
+/*import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Explosion;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -143,6 +153,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> CEILING = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<ItemStack> PAINT = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.ITEM_STACK);
+    private static final String PAINT_TAG = "Paint";
     private boolean gunDrawn = false;
     private TurretEnableType enableType = TurretEnableType.ALWAYS_ON;
     private TurretMode mode = TurretMode.AGGRESSIVE;
@@ -183,6 +195,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         entityData.define(RECOIL, 0);
         entityData.define(CEILING, false);
         entityData.define(TYPE, TurretType.MODERN.ordinal());
+        entityData.define(PAINT, ItemStack.EMPTY);
     }
     //?} else {
     /*protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
@@ -191,6 +204,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         builder.define(RECOIL, 0);
         builder.define(CEILING, false);
         builder.define(TYPE, TurretType.MODERN.ordinal());
+        builder.define(PAINT, ItemStack.EMPTY);
     }
     *///?}
 
@@ -279,6 +293,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         tag.putInt("Energy", energy.getEnergyStored());
         tag.putBoolean("Ceiling", isCeiling());
         tag.putString("Type", getTurretType().name());
+        if (!getPaint().isEmpty()) tag.put(PAINT_TAG, savePaint());
     }
 
     @Override
@@ -297,6 +312,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         ownerName = tag.getString("OwnerName");
         energy.setEnergy(tag.getInt("Energy"));
         setCeiling(tag.getBoolean("Ceiling"));
+        loadPaint(tag);
     }
 
     public ItemStack getGunStack() {
@@ -305,6 +321,68 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     public void setGunStack(ItemStack stack) {
         setItemSlot(EquipmentSlot.MAINHAND, stack);
+    }
+
+    public ItemStack getLaserStack() {
+        return getOffhandItem();
+    }
+
+    public void setLaserStack(ItemStack stack) {
+        setItemSlot(EquipmentSlot.OFFHAND, stack);
+    }
+
+    public boolean isLaser(ItemStack stack) {
+        IAttachment attachment = IAttachment.getIAttachmentOrNull(stack);
+        return attachment != null && attachment.getType(stack) == AttachmentType.LASER;
+    }
+
+    public boolean hasLaser() {
+        return isLaser(getLaserStack());
+    }
+
+    public ItemStack getPaint() {
+        return entityData.get(PAINT);
+    }
+
+    public void setPaint(ItemStack stack) {
+        entityData.set(PAINT, stack);
+    }
+
+    public static boolean isPaint(ItemStack stack) {
+        return stack.getItem() instanceof BannerItem || stack.getItem() instanceof DyeItem || stack.getItem() instanceof CamoItem;
+    }
+
+    private void removeCamo() {
+        if (!(getPaint().getItem() instanceof CamoItem)) return;
+        if (TACZTurretsConfig.RETURN_CAMOS.get()) spawnAtLocation(getPaint().copy());
+        setPaint(ItemStack.EMPTY);
+    }
+
+    private Tag savePaint() {
+        //? if forge {
+        return getPaint().save(new CompoundTag());
+        //?} else {
+        /*return getPaint().save(level().registryAccess());
+        *///?}
+    }
+
+    public void loadPaint(CompoundTag tag) {
+        //? if forge {
+        setPaint(ItemStack.of(tag.getCompound(PAINT_TAG)));
+        //?} else {
+        /*setPaint(ItemStack.parseOptional(level().registryAccess(), tag.getCompound(PAINT_TAG)));
+        *///?}
+    }
+
+    public ItemStack toItem() {
+        ItemStack stack = new ItemStack(ItemRegistry.turret(getTurretType()));
+        if (getPaint().isEmpty()) return stack;
+        //? if forge {
+        stack.getOrCreateTag().put(PAINT_TAG, savePaint());
+        //?} else {
+        /*CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.put(PAINT_TAG, savePaint()));
+        *///?}
+        return stack;
     }
 
     public ModernKineticGunItem getGunItem() {
@@ -562,7 +640,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             dropOverflow();
             if (!isCeiling() && !onGround() && !level().getEntitiesOfClass(TurretEntity.class, getBoundingBox(), turret -> turret != this).isEmpty()) {
                 dropContents();
-                spawnAtLocation(new ItemStack(ItemRegistry.turret(getTurretType())));
+                spawnAtLocation(toItem());
                 playTurretSound(SoundRegistry.TURRET_PICKUP.get());
                 discard();
                 return;
@@ -648,15 +726,42 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             lastRepairTick = tickCount;
             return InteractionResult.SUCCESS;
         }
+        if (player.isCrouching() && heldStack.getItem() instanceof AxeItem) {
+            if (!getPaint().isEmpty()) {
+                removeCamo();
+                setPaint(ItemStack.EMPTY);
+                //? if forge {
+                heldStack.hurtAndBreak(1, player, user -> user.broadcastBreakEvent(hand));
+                //?} else {
+                /*heldStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+                *///?}
+                playTurretSound(SoundEvents.AXE_SCRAPE);
+                if (level() instanceof ServerLevel serverLevel) serverLevel.sendParticles(ParticleTypes.SCRAPE, getX(), getY() + getBbHeight() * 0.6D, getZ(), 12, getBbWidth() * 0.5D, getBbHeight() * 0.4D, getBbWidth() * 0.5D, 0.0D);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (player.isCrouching() && isPaint(heldStack)) {
+            ItemStack paint = heldStack.copyWithCount(1);
+            if (!ItemStack.matches(getPaint(), paint)) {
+                removeCamo();
+                setPaint(paint);
+                if (!player.isCreative()) heldStack.shrink(1);
+                playTurretSound(SoundEvents.DYE_USE);
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (player.isCrouching()) {
             boolean itemsToInventory = TACZTurretsConfig.PICKUP_ITEMS_TO_INVENTORY.get();
             ItemStack gunStack = getGunStack();
             setGunStack(ItemStack.EMPTY);
             giveOrDrop(player, gunStack, itemsToInventory);
+            ItemStack laserStack = getLaserStack();
+            setLaserStack(ItemStack.EMPTY);
+            giveOrDrop(player, laserStack, itemsToInventory);
             for (int slot = 0; slot < inventory.getSlots(); slot++) {
                 giveOrDrop(player, inventory.extractItem(slot, inventory.getStackInSlot(slot).getCount(), false), itemsToInventory);
             }
-            if (!player.isCreative()) giveOrDrop(player, new ItemStack(ItemRegistry.turret(getTurretType())), TACZTurretsConfig.PICKUP_TURRET_TO_INVENTORY.get());
+            if (!player.isCreative()) giveOrDrop(player, toItem(), TACZTurretsConfig.PICKUP_TURRET_TO_INVENTORY.get());
             playTurretSound(SoundRegistry.TURRET_PICKUP.get());
             discard();
             return InteractionResult.SUCCESS;
@@ -778,7 +883,9 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     //?} else {
     /*protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NotNull DamageSource source, boolean recentlyHit) {
     *///?}
-        if (TACZTurretsConfig.DROP_ITEMS_ON_DEATH.get()) dropContents();
+        if (!TACZTurretsConfig.DROP_ITEMS_ON_DEATH.get()) return;
+        dropContents();
+        removeCamo();
     }
 
     private void dropContents() {
@@ -787,6 +894,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         }
         if (hasGun()) spawnAtLocation(getGunStack());
         setGunStack(ItemStack.EMPTY);
+        if (!getLaserStack().isEmpty()) spawnAtLocation(getLaserStack());
+        setLaserStack(ItemStack.EMPTY);
     }
 
     @Override
@@ -835,7 +944,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(ItemRegistry.turret(getTurretType()));
+        return toItem();
     }
 
     @Override

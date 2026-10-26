@@ -21,6 +21,7 @@ public enum TurretType {
     public final double defaultReloadSpeed;
     private final ResourceLocation model;
     private final ResourceLocation[] textures;
+    private final ResourceLocation paintMask;
 
     TurretType(String name, int health, double armor, int range, double inaccuracy, double reloadSpeed) {
         defaultHealth = health;
@@ -29,6 +30,7 @@ public enum TurretType {
         defaultInaccuracy = inaccuracy;
         defaultReloadSpeed = reloadSpeed;
         model = TACZTurrets.id("geo/entity/" + name + ".geo.json");
+        paintMask = TACZTurrets.id("textures/entity/" + name + "_paint.png");
         textures = Arrays.stream(TurretState.values()).map(state -> TACZTurrets.id("textures/entity/" + name + "_" + state.name().toLowerCase(Locale.ROOT) + ".png")).toArray(ResourceLocation[]::new);
     }
 
@@ -46,5 +48,9 @@ public enum TurretType {
 
     public ResourceLocation texture(TurretState state) {
         return textures[state.ordinal()];
+    }
+
+    public ResourceLocation paintMask() {
+        return paintMask;
     }
 }

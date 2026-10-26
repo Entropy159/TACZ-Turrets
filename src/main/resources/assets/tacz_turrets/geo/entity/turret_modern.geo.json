@@ -54,6 +54,11 @@
 					"name": "gun",
 					"parent": "head",
 					"pivot": [0, 13, 0]
+				},
+				{
+					"name": "laser",
+					"parent": "head",
+					"pivot": [-4, 15, -5]
 				}
 			]
 		}

@@ -1,0 +1,36 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "item": "minecraft:paper"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "tag": "minecraft:stone_bricks"
+      },
+      "count": 4
+    },
+    {
+      "item": {
+        "item": "minecraft:gray_dye"
+      },
+      "count": 1
+    },
+    {
+      "item": {
+        "item": "minecraft:black_dye"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:camos",
+    "item": {
+      "id": "tacz_turrets:urban_camo"
+    }
+  }
+}

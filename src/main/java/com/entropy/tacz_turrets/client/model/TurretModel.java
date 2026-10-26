@@ -6,6 +6,7 @@ import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.constant.DataTickets;
 //? if forge {
 import software.bernie.geckolib.core.animation.AnimationState;
@@ -43,6 +44,9 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
         var center = getAnimationProcessor().getBone("center");
         if (center != null) {
             center.setRotY(yaw * Mth.DEG_TO_RAD);
+        }
+        if (getAnimationProcessor().getBone("laser") instanceof GeoBone laser) {
+            laser.setTrackingMatrices(true);
         }
     }
 }

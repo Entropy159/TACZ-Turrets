@@ -63,6 +63,10 @@ public class TACZTurretsConfig {
             .comment("Destroyed turrets drop their gun and ammo.")
             .define("dropItemsOnDeath", true);
 
+    public static final BooleanValue RETURN_CAMOS = BUILDER
+            .comment("Get a turret's camo back when it is scraped off, replaced or destroyed.")
+            .define("returnCamos", false);
+
     public static final BooleanValue PICKUP_ITEMS_TO_INVENTORY = BUILDER
             .comment("Picking up a turret puts its gun and ammo in your inventory. If false, they drop on the ground.")
             .define("pickupItemsToInventory", true);
@@ -284,6 +288,10 @@ public class TACZTurretsConfig {
     public static final EnumValue<RecoilType> RECOIL_TYPE = CLIENT_BUILDER
             .comment("Turret recoil type. BOUNCE kicks the barrel up, PUSH slides the gun backwards.")
             .defineEnum("recoilType", RecoilType.PUSH);
+
+    public static final BooleanValue LASER_WITHOUT_GUN = CLIENT_BUILDER
+            .comment("Show a turret's laser even when it has no gun.")
+            .define("laserWithoutGun", true);
 
     //? if forge {
     public static final ForgeConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();

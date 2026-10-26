@@ -60,12 +60,13 @@ public class TurretMenu extends AbstractContainerMenu {
         this.canModify = canModify;
         this.allies = new HashSet<>(allies);
         this.layout = layout;
-        this.container = turret == null ? new SimpleContainer(layout.ammoSlots + 1) : new TurretContainer(turret, layout.ammoSlots);
+        this.container = turret == null ? new SimpleContainer(layout.ammoSlots + TurretContainer.FIRST_AMMO_SLOT) : new TurretContainer(turret, layout.ammoSlots);
         this.data = turret == null || playerInventory.player.level().isClientSide() ? new SimpleContainerData(DATA_SIZE) : new TurretMenuData(turret);
 
         addSlot(new TurretSlot(TurretContainer.GUN_SLOT, layout.gunSlotX, layout.gunSlotY));
+        addSlot(new TurretSlot(TurretContainer.LASER_SLOT, layout.laserSlotX, layout.gunSlotY));
         for (int slot = 0; slot < layout.ammoSlots; slot++) {
-            addSlot(new TurretSlot(slot + 1, layout.ammoSlotX(slot), layout.ammoSlotY(slot)));
+            addSlot(new TurretSlot(slot + TurretContainer.FIRST_AMMO_SLOT, layout.ammoSlotX(slot), layout.ammoSlotY(slot)));
         }
 
         for (int row = 0; row < 3; row++) {
@@ -206,7 +207,7 @@ public class TurretMenu extends AbstractContainerMenu {
 
         @Override
         public int getMaxStackSize() {
-            return getContainerSlot() == TurretContainer.GUN_SLOT ? 1 : super.getMaxStackSize();
+            return getContainerSlot() < TurretContainer.FIRST_AMMO_SLOT ? 1 : super.getMaxStackSize();
         }
     }
 

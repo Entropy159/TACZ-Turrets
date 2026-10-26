@@ -3,6 +3,7 @@ package com.entropy.tacz_turrets;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.config.TurretEnabledCondition;
 import com.entropy.tacz_turrets.network.TACZTurretsNetwork;
+import com.entropy.tacz_turrets.registry.CreativeTabRegistry;
 import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
 import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.registry.MenuRegistry;
@@ -64,6 +65,7 @@ public class TACZTurrets {
     *///?}
         EntityTypeRegistry.TYPES.register(modEventBus);
         ItemRegistry.ITEMS.register(modEventBus);
+        CreativeTabRegistry.TABS.register(modEventBus);
         MenuRegistry.MENUS.register(modEventBus);
         SoundRegistry.SOUNDS.register(modEventBus);
         modEventBus.addListener((EntityAttributeCreationEvent event) -> event.put(EntityTypeRegistry.TURRET.get(), TurretEntity.createLivingAttributes().build()));

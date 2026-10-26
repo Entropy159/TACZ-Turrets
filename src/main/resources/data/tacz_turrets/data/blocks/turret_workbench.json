@@ -7,6 +7,14 @@
         "item": "tacz_turrets:modern_turret",
         "id": "tacz_turrets:modern_turret"
       }
+    },
+    {
+      "id": "tacz_turrets:camos",
+      "name": "tacz_turrets.tab.camos",
+      "icon": {
+        "item": "tacz_turrets:forest_camo",
+        "id": "tacz_turrets:forest_camo"
+      }
     }
   ]
 }

@@ -23,7 +23,9 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 
 import java.util.function.Consumer;
 //?} else {
-/*import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+/*import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 *///?}
 
@@ -70,6 +72,11 @@ public class TurretItem extends Item implements GeoItem {
         }
         TurretEntity turret = new TurretEntity(level, pos, context.getPlayer(), type);
         turret.setCeiling(ceiling);
+        //? if forge {
+        if (context.getItemInHand().getTag() != null) turret.loadPaint(context.getItemInHand().getTag());
+        //?} else {
+        /*turret.loadPaint(context.getItemInHand().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
+        *///?}
         level.addFreshEntity(turret);
         turret.playTurretSound(SoundRegistry.TURRET_PLACE.get());
         if (!context.getPlayer().isCreative()) context.getItemInHand().shrink(1);

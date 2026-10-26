@@ -18,6 +18,7 @@ public class TurretLayout {
     public final int energyBarY;
     public final int gunSlotX;
     public final int gunSlotY;
+    public final int laserSlotX;
     public final int ammoStartX;
     public final int ammoStartY;
     public final int buttonsY;
@@ -40,6 +41,7 @@ public class TurretLayout {
         this.energyBarY = healthBarY + BAR_HEIGHT + 3;
         this.gunSlotY = energyBarY + BAR_HEIGHT + 6;
         this.gunSlotX = (width - SLOT) / 2;
+        this.laserSlotX = gunSlotX + SLOT;
         this.ammoStartY = gunSlotY + SLOT + 4;
         this.ammoStartX = (width - ammoWidth) / 2;
         this.buttonsY = ammoStartY + this.rows * SLOT + 5;

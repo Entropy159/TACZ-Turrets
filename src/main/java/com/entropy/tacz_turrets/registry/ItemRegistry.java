@@ -7,9 +7,11 @@ import com.entropy.tacz_turrets.turret.TurretType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 //? if forge {
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
 //?} else {
-/*import net.neoforged.neoforge.registries.DeferredRegister;
+/*import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
 *///?}
 
 import java.util.EnumMap;
@@ -30,6 +32,12 @@ public class ItemRegistry {
         //? if neoforge
         /*ITEMS.addAlias(TACZTurrets.id("turret"), TACZTurrets.id("modern_turret"));*/
     }
+
+    //? if forge {
+    public static final Supplier<Item> SENTRY_SPAWN_EGG = ITEMS.register("sentry_turret_spawn_egg", () -> new ForgeSpawnEggItem(EntityTypeRegistry.SENTRY, 0x3B4046, 0xD8492F, new Item.Properties()));
+    //?} else {
+    /*public static final Supplier<Item> SENTRY_SPAWN_EGG = ITEMS.register("sentry_turret_spawn_egg", () -> new DeferredSpawnEggItem(EntityTypeRegistry.SENTRY, 0x3B4046, 0xD8492F, new Item.Properties()));
+    *///?}
 
     public static TurretItem turret(TurretType type) {
         return TURRETS.get(type).get();

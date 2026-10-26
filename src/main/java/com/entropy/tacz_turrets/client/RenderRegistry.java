@@ -40,6 +40,7 @@ public class RenderRegistry {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityTypeRegistry.TURRET.get(), TurretRenderer::new);
+        event.registerEntityRenderer(EntityTypeRegistry.SENTRY.get(), TurretRenderer::new);
     }
 
     @SubscribeEvent

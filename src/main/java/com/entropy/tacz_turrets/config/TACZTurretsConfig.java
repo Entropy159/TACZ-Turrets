@@ -195,6 +195,142 @@ public class TACZTurretsConfig {
             .comment("Turrets need FE to run.")
             .define("requireEnergy", false);
 
+    public static final BooleanValue LOCK_ON_DELAY = BUILDER
+            .comment("Turrets lock on for a second before firing.")
+            .define("lockOnDelay", true);
+
+    public static final IntValue LOCK_ON_SOUND_RANGE = BUILDER
+            .comment("How many blocks away the turret lock on sound can be heard.")
+            .defineInRange("lockOnSoundRange", 16, 1, 256);
+
+    public static final BooleanValue PAN_SOUNDS = BUILDER
+            .comment("Turrets make a sound when they look around.")
+            .define("panSounds", true);
+
+    public static final IntValue MAX_TURRETS_PER_PLAYER = BUILDER
+            .comment("Most turrets one player can have placed. 0 means no limit.")
+            .defineInRange("maxTurretsPerPlayer", 0, 0, 10000);
+
+    public static final DoubleValue TURRET_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Damage multiplier for player turrets.")
+            .defineInRange("turretDamageMultiplier", 1.0D, 0.0D, 100.0D);
+
+    public static final DoubleValue PVP_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Damage multiplier for player turrets hitting players.")
+            .defineInRange("pvpDamageMultiplier", 1.0D, 0.0D, 100.0D);
+
+    public static final BooleanValue TARGET_INVISIBLE = BUILDER
+            .comment("Turrets target invisible mobs and players.")
+            .define("targetInvisible", false);
+
+    public static final BooleanValue TARGET_NEUTRAL_MOBS = BUILDER
+            .comment("Turrets attack neutral mobs while they're angry.")
+            .define("targetNeutralMobs", true);
+
+    public static final BooleanValue IGNORE_NAMED_MOBS = BUILDER
+            .comment("Turrets ignore mobs with a custom name.")
+            .define("ignoreNamedMobs", false);
+
+    public static final BooleanValue PULL_AMMO_FROM_STORAGE = BUILDER
+            .comment("Turrets take ammo from the storage block under them.")
+            .define("pullAmmoFromStorage", true);
+
+    public static final BooleanValue NOTIFY_OWNER = BUILDER
+            .comment("Tell the owner when their turret is destroyed.")
+            .define("notifyOwner", false);
+
+    public static final BooleanValue DROP_TURRET_ON_DEATH = BUILDER
+            .comment("Destroyed turrets drop themselves.")
+            .define("dropTurretOnDeath", false);
+
+    public static final BooleanValue EXPLOSION_IMMUNE = BUILDER
+            .comment("Turrets are immune to explosions.")
+            .define("explosionImmune", false);
+
+    public static final BooleanValue FIRE_IMMUNE = BUILDER
+            .comment("Turrets are immune to fire.")
+            .define("fireImmune", true);
+
+    public static final BooleanValue LAVA_IMMUNE = BUILDER
+            .comment("Turrets are immune to lava.")
+            .define("lavaImmune", false);
+
+    public static final DoubleValue SENTRY_HEALTH_MULTIPLIER = BUILDER
+            .comment("Health multiplier for sentry turrets.")
+            .defineInRange("sentryHealthMultiplier", 1.0D, 0.01D, 100.0D);
+
+    public static final DoubleValue SENTRY_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Damage multiplier for sentry turrets.")
+            .defineInRange("sentryDamageMultiplier", 1.0D, 0.0D, 100.0D);
+
+    public static final DoubleValue SENTRY_ARMOR_MULTIPLIER = BUILDER
+            .comment("Armor multiplier for sentry turrets.")
+            .defineInRange("sentryArmorMultiplier", 1.0D, 0.0D, 100.0D);
+
+    public static final DoubleValue SENTRY_ACCURACY_MULTIPLIER = BUILDER
+            .comment("Accuracy multiplier for sentry turrets.")
+            .defineInRange("sentryAccuracyMultiplier", 0.8D, 0.01D, 10.0D);
+
+    public static final DoubleValue SENTRY_RELOAD_SPEED_MULTIPLIER = BUILDER
+            .comment("Reload speed multiplier for sentry turrets.")
+            .defineInRange("sentryReloadSpeedMultiplier", 0.8D, 0.01D, 10.0D);
+
+    public static final BooleanValue SENTRY_DIFFICULTY_SCALING = BUILDER
+            .comment("Sentry turret health and damage follow the world difficulty.")
+            .define("sentryDifficultyScaling", false);
+
+    public static final BooleanValue SENTRY_SNEAK_RANGE = BUILDER
+            .comment("Sentry turrets spot crouching players at a shorter range.")
+            .define("sentrySneakRange", true);
+
+    public static final DoubleValue SENTRY_SNEAK_RANGE_MULTIPLIER = BUILDER
+            .comment("Range multiplier for sentry turrets spotting crouching players.")
+            .defineInRange("sentrySneakRangeMultiplier", 0.5D, 0.0D, 1.0D);
+
+    public static final IntValue SENTRY_EXPERIENCE = BUILDER
+            .comment("Experience dropped by destroyed sentry turrets.")
+            .defineInRange("sentryExperience", 0, 0, 10000);
+
+    public static final DoubleValue SENTRY_TURRET_DROP_CHANCE = BUILDER
+            .comment("Chance a destroyed sentry turret drops itself.")
+            .defineInRange("sentryTurretDropChance", 0.0D, 0.0D, 1.0D);
+
+    public static final IntValue SENTRY_SPAWN_PROTECTION = BUILDER
+            .comment("No surface or cave sentry turrets spawn within this many blocks of world spawn.")
+            .defineInRange("sentrySpawnProtection", 0, 0, 100000);
+
+    public static final BooleanValue SENTRY_MATERIAL_DROPS = BUILDER
+            .comment("Destroyed sentry turrets drop crafting materials.")
+            .define("sentryMaterialDrops", true);
+
+    public static final BooleanValue SENTRY_PASSIVE_HEALING = BUILDER
+            .comment("Sentry turrets heal over time.")
+            .define("sentryPassiveHealing", false);
+
+    public static final BooleanValue SENTRIES_RELOAD = BUILDER
+            .comment("Sentry turrets need to reload.")
+            .define("sentriesReload", true);
+
+    public static final BooleanValue SURFACE_SENTRY_SPAWNS = BUILDER
+            .comment("Sentry turrets spawn on the surface.")
+            .define("surfaceSentrySpawns", false);
+
+    public static final BooleanValue CAVE_SENTRY_SPAWNS = BUILDER
+            .comment("Sentry turrets spawn in caves.")
+            .define("caveSentrySpawns", false);
+
+    public static final BooleanValue SENTRIES_TARGET_MOBS = BUILDER
+            .comment("Sentry turrets attack hostile mobs.")
+            .define("sentriesTargetMobs", false);
+
+    public static final BooleanValue SENTRIES_TARGET_TURRETS = BUILDER
+            .comment("Sentry turrets attack player turrets.")
+            .define("sentriesTargetTurrets", true);
+
+    public static final BooleanValue SNIPER_SENTRY_RANGE = BUILDER
+            .comment("Sniper guns double a sentry turret's range.")
+            .define("sniperSentryRange", false);
+
     //? if forge {
     public static final BooleanValue IDENTICAL_TURRETS = BUILDER
     //?} else {
@@ -242,10 +378,10 @@ public class TACZTurretsConfig {
         private TurretStats(TurretType type) {
             //? if forge {
             BUILDER.push(type.id());
-            enabled = BUILDER.comment("Whether this turret can be crafted and placed.").define("enabled", true);
+            enabled = BUILDER.comment("Whether this turret can be crafted, placed and spawn as a sentry turret.").define("enabled", true);
             //?} else {
             /*COMMON_BUILDER.push(type.id());
-            enabled = COMMON_BUILDER.comment("Whether this turret can be crafted and placed.").define("enabled", true);
+            enabled = COMMON_BUILDER.comment("Whether this turret can be crafted, placed and spawn as a sentry turret.").define("enabled", true);
             COMMON_BUILDER.pop();
             BUILDER.push(type.id());
             *///?}
@@ -292,6 +428,10 @@ public class TACZTurretsConfig {
     public static final BooleanValue LASER_WITHOUT_GUN = CLIENT_BUILDER
             .comment("Show a turret's laser even when it has no gun.")
             .define("laserWithoutGun", true);
+
+    public static final BooleanValue SHOW_OTHERS_LASERS = CLIENT_BUILDER
+            .comment("Show lasers from turrets you don't own.")
+            .define("showOthersLasers", true);
 
     //? if forge {
     public static final ForgeConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();

@@ -24,5 +24,24 @@
       "tacz_turrets:turret_hurt5",
       "tacz_turrets:turret_hurt6"
     ]
+  },
+  "turret_lock_on": {
+    "subtitle": "subtitles.tacz_turrets.turret_lock_on",
+    "sounds": [
+      "tacz_turrets:turret_lock_on1",
+      "tacz_turrets:turret_lock_on2",
+      "tacz_turrets:turret_lock_on3",
+      "tacz_turrets:turret_lock_on4",
+      "tacz_turrets:turret_lock_on5"
+    ]
+  },
+  "turret_pan": {
+    "subtitle": "subtitles.tacz_turrets.turret_pan",
+    "sounds": [
+      "tacz_turrets:turret_pan1",
+      "tacz_turrets:turret_pan2",
+      "tacz_turrets:turret_pan3",
+      "tacz_turrets:turret_pan4"
+    ]
   }
 }

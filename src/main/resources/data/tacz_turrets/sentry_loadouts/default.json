@@ -1,0 +1,25 @@
+{
+  "hostile": true,
+  "guns": [
+    {
+      "type": "rifle",
+      "weight": 4
+    },
+    {
+      "type": "smg",
+      "weight": 3
+    },
+    {
+      "type": "shotgun",
+      "weight": 2
+    },
+    {
+      "type": "mg",
+      "weight": 1
+    }
+  ],
+  "laser_chance": 0.25,
+  "paint_chance": 0.6,
+  "range": 32,
+  "gun_drop_chance": 0.1
+}

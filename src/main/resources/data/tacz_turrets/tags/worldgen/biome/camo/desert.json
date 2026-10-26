@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:desert",
+    "minecraft:beach",
+    {
+      "id": "#c:is_desert",
+      "required": false
+    },
+    {
+      "id": "#forge:is_desert",
+      "required": false
+    }
+  ]
+}

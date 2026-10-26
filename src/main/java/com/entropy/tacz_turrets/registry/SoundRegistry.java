@@ -18,4 +18,6 @@ public class SoundRegistry {
     public static final Supplier<SoundEvent> TURRET_PLACE = SOUNDS.register("turret_place", () -> SoundEvent.createVariableRangeEvent(TACZTurrets.id("turret_place")));
     public static final Supplier<SoundEvent> TURRET_PICKUP = SOUNDS.register("turret_pickup", () -> SoundEvent.createVariableRangeEvent(TACZTurrets.id("turret_pickup")));
     public static final Supplier<SoundEvent> TURRET_HURT = SOUNDS.register("turret_hurt", () -> SoundEvent.createVariableRangeEvent(TACZTurrets.id("turret_hurt")));
+    public static final Supplier<SoundEvent> TURRET_LOCK_ON = SOUNDS.register("turret_lock_on", () -> SoundEvent.createVariableRangeEvent(TACZTurrets.id("turret_lock_on")));
+    public static final Supplier<SoundEvent> TURRET_PAN = SOUNDS.register("turret_pan", () -> SoundEvent.createVariableRangeEvent(TACZTurrets.id("turret_pan")));
 }

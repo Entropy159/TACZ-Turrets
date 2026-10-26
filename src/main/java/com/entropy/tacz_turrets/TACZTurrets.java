@@ -68,12 +68,17 @@ public class TACZTurrets {
         CreativeTabRegistry.TABS.register(modEventBus);
         MenuRegistry.MENUS.register(modEventBus);
         SoundRegistry.SOUNDS.register(modEventBus);
-        modEventBus.addListener((EntityAttributeCreationEvent event) -> event.put(EntityTypeRegistry.TURRET.get(), TurretEntity.createLivingAttributes().build()));
+        modEventBus.addListener((EntityAttributeCreationEvent event) -> {
+            event.put(EntityTypeRegistry.TURRET.get(), TurretEntity.createLivingAttributes().build());
+            event.put(EntityTypeRegistry.SENTRY.get(), TurretEntity.createLivingAttributes().build());
+        });
         modEventBus.addListener(this::addCreative);
     }
 
     public void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == ModCreativeTabs.OTHER_TAB.getKey()) ItemRegistry.TURRETS.values().forEach(item -> event.accept(item.get()));
+        if (event.getTabKey() == ModCreativeTabs.OTHER_TAB.getKey()) ItemRegistry.TURRETS.forEach((type, item) -> {
+            if (TACZTurretsConfig.enabled(type)) event.accept(item.get());
+        });
     }
 
     public static ResourceLocation id(String path) {

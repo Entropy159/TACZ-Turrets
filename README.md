@@ -66,10 +66,85 @@ Turrets are crafted at the Turret Workbench. By default, they all use the Modern
 
 Sniper guns double a turret's range.
 
+## Sentry Turrets
+
+Sentry turrets have no owner and are meant for structures. When one spawns, it rolls a loadout that picks its turret type, gun, laser, camo and ammo. Hostile sentries shoot players on sight, and neutral ones only shoot back.
+
+- Only operators and creative players can open, pick up, paint or repair a sentry.
+- Sentries don't need power and don't shoot players on Peaceful.
+- A destroyed sentry drops a few of its turret's crafting materials, any ammo it had left, and sometimes its gun.
+
+### Sentry Turret Loadouts
+
+Loadouts are datapack files in `data/<namespace>/sentry_loadouts/`. A sentry with no loadout, or one that doesn't exist, uses `tacz_turrets:default`:
+
+```json
+{
+  "hostile": true,
+  "guns": [
+    {"type": "rifle", "weight": 4},
+    {"type": "smg", "weight": 3},
+    {"type": "shotgun", "weight": 2},
+    {"type": "mg", "weight": 1}
+  ],
+  "laser_chance": 0.25,
+  "paint_chance": 0.6,
+  "range": 32,
+  "gun_drop_chance": 0.1
+}
+```
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| `types` | all | Turret types to pick from: `modern`, `industrial`, `scifi`, `scrap`, `tactical`. |
+| `hostile` | `true` | `true` shoots players on sight, `false` only shoots back. |
+| `guns` | required | Weighted list. An entry names a gun (`"gun": "tacz:ak47"`), a TACZ gun type (`"type": "rifle"`), or neither for any gun. |
+| `ammo` | infinite | Rounds it spawns with, as `{"min": 60, "max": 180}`. Leave it out for infinite ammo. |
+| `laser_chance` | `0` | Chance of a random TACZ laser. |
+| `paint_chance` | `0` | Chance of a camo, dye or banner. |
+| `paints` | biome | Camos, dyes or banners. Each sentry gets one of them. Leave it out to pick a camo for the biome, using the biome tags `tacz_turrets:camo/<camo>`. |
+| `range` | `32` | Range in blocks. |
+| `gun_drop_chance` | `0.1` | Chance the gun drops when a player destroys the sentry. |
+| `laser_drop_chance` | `0` | Chance the laser drops when a player destroys the sentry. |
+
+TACZ's default gun types are `pistol`, `smg`, `rifle`, `shotgun`, `sniper`, `mg` and `rpg`.
+
+Each sentry gets one entry from `paints`, picked at random. An entry is an item id, like `"tacz_turrets:desert_camo"` or `"minecraft:yellow_dye"`, or a banner with patterns:
+
+```json
+"paints": [
+  {"banner": "black", "patterns": [{"pattern": "minecraft:skull", "color": "white"}]}
+]
+```
+
+### Sentry Turret Spawns
+
+Spawn rules are datapack files in `data/<namespace>/sentry_spawns/`. A spawn rule places sentries in structures, on the surface, or in caves. Surface and cave spawns are off by default and can be turned on with the `surfaceSentrySpawns` and `caveSentrySpawns` configs.
+
+```json
+{
+  "where": "structure",
+  "structures": ["minecraft:pillager_outpost"],
+  "loadout": "tacz_turrets:default",
+  "count": {"min": 2, "max": 4},
+  "ceiling_chance": 0.2
+}
+```
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| `where` | required | `structure`, `surface` or `cave`. |
+| `structures` | all | Structure ids or `#tags` the rule applies to. Only for `structure`. |
+| `biomes` | all | Biome ids or `#tags` sentries can spawn in. |
+| `loadout` | `tacz_turrets:default` | The loadout the sentries spawn with. |
+| `chance` | `1` | Chance per structure, or per chunk for `surface` and `cave`. |
+| `count` | `1` | Sentries per structure or chunk, as `{"min": 1, "max": 3}`. |
+| `ceiling_chance` | `0` | Chance a sentry hangs from a ceiling. Only for `structure` and `cave`. |
+
 ## Config
 
-- Server: Ammo use, what turrets can target, repair items, healing, sounds, whether scraped camos come back, and FE power (off by default; turrets pull FE from the block under them). Each turret has its own section for health, armor, range, accuracy, ammo slots, energy use and healing. Each turret can also be switched off.
-- Client: Health bar style and color, recoil animation, and whether a turret with no gun still shows its laser.
+- Server: How turrets and sentry turrets target, fight, use ammo and take damage, plus each turret type's stats. Turrets can also be set to run on FE from the block under them.
+- Client: How turrets look on your screen, such as health bar style and color.
 
 The entity tags `tacz_turrets:turret_targets` and `tacz_turrets:turret_ignored` can be used for what turrets will or will not target.
 

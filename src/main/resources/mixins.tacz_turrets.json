@@ -6,9 +6,12 @@
   "mixins": [
     "AmmoCheckMixin",
     "BulletProtectionMixin",
+    "ChunkGeneratorMixin",
+    "DeathMessageMixin",
     "InaccuracyMixin",
     "ReloadSpeedMixin",
     "ShootSoundMixin",
+    "StructureStartMixin",
     "TurretWorkbenchBlockMixin"
   ],
   "client": [

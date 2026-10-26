@@ -4,6 +4,8 @@ import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.turret.RetaliateTargeting;
+import com.entropy.tacz_turrets.turret.SentryLoadout;
+import com.entropy.tacz_turrets.turret.SentrySpawn;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretType;
 import net.minecraft.world.damagesource.DamageSource;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 //? if forge {
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -22,6 +25,7 @@ import net.minecraftforge.registries.MissingMappingsEvent;
 //?} else {
 /*import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -46,6 +50,12 @@ public class TurretEventHandler {
     //?}
 
     @SubscribeEvent
+    public static void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new SentryLoadout.Listener());
+        event.addListener(new SentrySpawn.Listener());
+    }
+
+    @SubscribeEvent
     //? if forge {
     public static void onLivingAttack(LivingAttackEvent event) {
     //?} else {
@@ -56,6 +66,16 @@ public class TurretEventHandler {
         if (turret.isProtectedFromFire(event.getEntity())) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    //? if forge {
+    public static void onTurretDamage(LivingHurtEvent event) {
+    //?} else {
+    /*public static void onTurretDamage(LivingIncomingDamageEvent event) {
+    *///?}
+        TurretEntity turret = getAttackingTurret(event.getSource());
+        if (turret != null) event.setAmount(event.getAmount() * turret.damageMultiplier(event.getEntity()));
     }
 
     @SubscribeEvent

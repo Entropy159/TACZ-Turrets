@@ -4,6 +4,7 @@ import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.registry.SoundRegistry;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretType;
+import com.entropy.tacz_turrets.util.PlacedTurrets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -70,6 +71,11 @@ public class TurretItem extends Item implements GeoItem {
             context.getPlayer().displayClientMessage(Component.translatable("message.tacz_turrets.turret_disabled"), true);
             return InteractionResult.FAIL;
         }
+        int limit = TACZTurretsConfig.MAX_TURRETS_PER_PLAYER.get();
+        if (limit > 0 && !context.getPlayer().isCreative() && level.getServer() != null && PlacedTurrets.get(level.getServer()).count(context.getPlayer().getUUID()) >= limit) {
+            context.getPlayer().displayClientMessage(Component.translatable("message.tacz_turrets.turret_limit", limit), true);
+            return InteractionResult.FAIL;
+        }
         TurretEntity turret = new TurretEntity(level, pos, context.getPlayer(), type);
         turret.setCeiling(ceiling);
         //? if forge {
@@ -78,6 +84,7 @@ public class TurretItem extends Item implements GeoItem {
         /*turret.loadPaint(context.getItemInHand().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
         *///?}
         level.addFreshEntity(turret);
+        turret.trackPlacement();
         turret.playTurretSound(SoundRegistry.TURRET_PLACE.get());
         if (!context.getPlayer().isCreative()) context.getItemInHand().shrink(1);
         return InteractionResult.CONSUME;

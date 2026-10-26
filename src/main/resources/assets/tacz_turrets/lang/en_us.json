@@ -1,5 +1,6 @@
 {
   "entity.tacz_turrets.turret": "Turret",
+  "entity.tacz_turrets.sentry_turret": "Sentry Turret",
   "item.tacz_turrets.modern_turret": "Modern Turret",
   "item.tacz_turrets.industrial_turret": "Industrial Turret",
   "item.tacz_turrets.scifi_turret": "Sci-Fi Turret",
@@ -24,7 +25,11 @@
   "item.tacz_turrets.dark_oak_camo": "Dark Oak Camo",
   "item.tacz_turrets.mangrove_camo": "Mangrove Camo",
   "item.tacz_turrets.cherry_camo": "Cherry Camo",
+  "item.tacz_turrets.sentry_turret_spawn_egg": "Sentry Turret Spawn Egg",
   "itemGroup.tacz_turrets": "TACZ Turrets",
+  "death.attack.tacz_turrets.turret.1": "%1$s was shot by %2$s",
+  "death.attack.tacz_turrets.turret.2": "%1$s was gunned down by %2$s",
+  "death.attack.tacz_turrets.turret.3": "%1$s was mowed down by %2$s",
   "block.tacz_turrets.turret_workbench": "Turret Workbench",
   "block.tacz_turrets.turret_workbench.desc": "Use to craft turrets.",
   "tacz_turrets.tab.turrets": "Turrets",
@@ -32,6 +37,7 @@
   "pack.tacz_turrets.name": "TACZ Turrets",
   "pack.tacz_turrets.desc": "Turrets that fire TACZ guns.",
   "message.tacz_turrets.turret_disabled": "This turret is disabled on this server.",
+  "message.tacz_turrets.turret_limit": "You can't place more than %s turrets.",
   "gui.tacz_turrets.health": "Health: %s / %s",
   "gui.tacz_turrets.energy": "Energy: %s / %s FE",
   "gui.tacz_turrets.enable_type.always_on": "Always On",
@@ -64,5 +70,7 @@
   "gui.tacz_turrets.allies.empty": "No other players online.",
   "subtitles.tacz_turrets.turret_place": "Turret deployed",
   "subtitles.tacz_turrets.turret_pickup": "Turret retrieved",
-  "subtitles.tacz_turrets.turret_hurt": "Turret hurts"
+  "subtitles.tacz_turrets.turret_hurt": "Turret hurts",
+  "subtitles.tacz_turrets.turret_lock_on": "Turret locks on",
+  "subtitles.tacz_turrets.turret_pan": "Turret whirs"
 }

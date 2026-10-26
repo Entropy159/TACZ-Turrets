@@ -1,0 +1,5 @@
+{
+  "where": "surface",
+  "biomes": ["#minecraft:is_overworld"],
+  "chance": 0.005
+}

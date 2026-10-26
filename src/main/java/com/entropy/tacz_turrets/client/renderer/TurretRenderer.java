@@ -89,7 +89,8 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
         poseStack.popPose();
 
         TurretState state = TurretState.getState(turret);
-        if (turret.isAlive() && turret.hasLaser() && state != TurretState.DISABLED && (state != TurretState.NO_GUN || TACZTurretsConfig.LASER_WITHOUT_GUN.get())) {
+        boolean visible = TACZTurretsConfig.SHOW_OTHERS_LASERS.get() || (Minecraft.getInstance().player != null && turret.isOwnerId(Minecraft.getInstance().player.getUUID()));
+        if (visible && turret.isAlive() && turret.hasLaser() && state != TurretState.DISABLED && (state != TurretState.NO_GUN || TACZTurretsConfig.LASER_WITHOUT_GUN.get())) {
             model.getBone("laser").ifPresent(laser -> renderLaser(turret, new Matrix4f(entityRenderTranslations).invert().mul(modelRenderTranslations).mul(laser.getModelSpaceMatrix()), poseStack, partialTick));
         }
     }

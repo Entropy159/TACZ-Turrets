@@ -1,6 +1,5 @@
 package com.entropy.tacz_turrets.mixin;
 
-import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.tacz.guns.entity.shooter.LivingEntityAmmoCheck;
@@ -16,8 +15,13 @@ public class AmmoCheckMixin {
     @Final
     private LivingEntity shooter;
 
-    @ModifyReturnValue(method = {"needCheckAmmo", "consumesAmmoOrNot"}, at = @At("RETURN"), remap = false, require = 2)
-    private boolean infiniteAmmoForTurrets(boolean original) {
-        return original && (TACZTurretsConfig.CONSUME_AMMO.get() || !(shooter instanceof TurretEntity));
+    @ModifyReturnValue(method = "needCheckAmmo", at = @At("RETURN"), remap = false)
+    private boolean freeReloadsForTurrets(boolean original) {
+        return original && !(shooter instanceof TurretEntity turret && turret.hasInfiniteAmmo());
+    }
+
+    @ModifyReturnValue(method = "consumesAmmoOrNot", at = @At("RETURN"), remap = false)
+    private boolean magazineUseForTurrets(boolean original) {
+        return original && !(shooter instanceof TurretEntity turret && !turret.usesMagazine());
     }
 }

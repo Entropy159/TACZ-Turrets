@@ -117,8 +117,8 @@ tasks.processResources {
         "ftbteams_min" to mod.dep("ftbteams_min"),
         "opac_min" to mod.dep("opac_min")
     )
-    if (isForge) exclude("META-INF/neoforge.mods.toml", "data/*/recipe/**", "data/*/tags/entity_type/**")
-    else exclude("META-INF/mods.toml", "data/*/recipes/**", "data/*/tags/entity_types/**")
+    if (isForge) exclude("META-INF/neoforge.mods.toml", "data/*/recipe/**", "data/*/tags/entity_type/**", "data/*/loot_table/**")
+    else exclude("META-INF/mods.toml", "data/*/recipes/**", "data/*/tags/entity_types/**", "data/*/loot_tables/**")
 }
 
 tasks.register<Copy>("buildAndCollect") {

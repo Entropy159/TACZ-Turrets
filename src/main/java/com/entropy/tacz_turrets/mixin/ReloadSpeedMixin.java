@@ -15,7 +15,7 @@ public class ReloadSpeedMixin {
 
     @ModifyReturnValue(method = "getReloadTime", at = @At("RETURN"), remap = false)
     private long turretReloadSpeed(long time) {
-        if (time > 0 && shooter instanceof TurretEntity turret) return (long) (time * turret.stats().reloadSpeed.get());
+        if (time > 0 && shooter instanceof TurretEntity turret) return (long) (time * turret.reloadSpeed());
         return time;
     }
 }

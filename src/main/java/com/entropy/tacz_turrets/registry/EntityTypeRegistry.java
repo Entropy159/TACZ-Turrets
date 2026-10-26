@@ -18,4 +18,5 @@ public class EntityTypeRegistry {
     public static final DeferredRegister<EntityType<?>> TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
 
     public static final Supplier<EntityType<TurretEntity>> TURRET = TYPES.register("turret", () -> EntityType.Builder.<TurretEntity>of(TurretEntity::new, MobCategory.MISC).sized(1f, 1f).build("turret"));
+    public static final Supplier<EntityType<TurretEntity>> SENTRY = TYPES.register("sentry_turret", () -> EntityType.Builder.<TurretEntity>of(TurretEntity::new, MobCategory.MISC).sized(1f, 1f).build("sentry_turret"));
 }

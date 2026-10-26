@@ -172,7 +172,7 @@ public class TACZTurretsConfig {
             .define("protectOwner", true);
 
     public static final BooleanValue RESPECT_TEAMS = BUILDER
-            .comment("Turrets spare their owner's teammates on vanilla teams, FTB Teams and Open Parties and Claims parties. Allies of the owner's FTB team or party count as teammates.")
+            .comment("Turrets spare their owner's teammates via vanilla or modded methods such as FTB Teams or Open Parties and Claims.")
             .define("respectTeams", true);
 
     public static final BooleanValue CREDIT_KILLS_TO_OWNER = BUILDER

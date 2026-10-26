@@ -55,6 +55,7 @@ dependencies {
     modImplementation(tacz)
     modCompileOnly("dev.ftb.mods:ftb-teams-$loader:${mod.dep("ftbteams")}") { isTransitive = false }
     modCompileOnly("maven.modrinth:open-parties-and-claims:${mod.dep("opac")}") { isTransitive = false }
+    if (isForge) modCompileOnly("maven.modrinth:villager-recruits:${mod.dep("recruits")}") { isTransitive = false }
     modLocalRuntime("mezz.jei:jei-$minecraft-$loader:${mod.dep("jei")}") { isTransitive = false }
 
     val taczNested = layout.buildDirectory.dir("tacz-jarjar/${mod.dep("tacz")}").get().asFile

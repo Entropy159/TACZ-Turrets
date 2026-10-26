@@ -3,6 +3,8 @@ package com.entropy.tacz_turrets.turret;
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.compat.FTBTeamsCompat;
 import com.entropy.tacz_turrets.compat.OpenPACCompat;
+//? if forge
+import com.entropy.tacz_turrets.compat.RecruitsCompat;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.item.CamoItem;
 import com.entropy.tacz_turrets.menu.TurretLayout;
@@ -84,6 +86,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.phys.Vec3;
 //? if forge {
 import net.minecraftforge.common.capabilities.Capability;
@@ -152,6 +155,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     private static final boolean FTB_TEAMS = ModList.get().isLoaded("ftbteams");
     private static final boolean OPEN_PAC = ModList.get().isLoaded("openpartiesandclaims");
+    //? if forge
+    private static final boolean RECRUITS = ModList.get().isLoaded("recruits");
     private static final int TARGET_SPREAD_INTERVAL = 10;
     private static final int TARGET_LOST_LOOK_TICKS = 60;
     private static final double TARGET_SPREAD_REACH = 4.0D;
@@ -1280,10 +1285,16 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public boolean isAlliedWithOwner(LivingEntity target) {
         MinecraftServer server = level().getServer();
         if (owner != null && server != null && TurretAllies.get(server).isAlly(owner, target.getUUID())) return true;
+        //? if forge
+        if (RECRUITS && owner != null && RecruitsCompat.isOwnRecruit(owner, target)) return true;
         if (!TACZTurretsConfig.RESPECT_TEAMS.get()) return false;
         if (owner != null && server != null && target instanceof Player && isPartyAlly(server, target.getUUID())) return true;
         if (target.getTeam() == null) return false;
         if (isAlliedTo(target)) return true;
+        PlayerTeam ownerTeam = server == null || ownerName.isEmpty() ? null : server.getScoreboard().getPlayersTeam(ownerName);
+        if (ownerTeam != null && ownerTeam == target.getTeam()) return true;
+        //? if forge
+        if (RECRUITS && ownerTeam != null && RecruitsCompat.isAlliedFaction(ownerTeam, target.getTeam())) return true;
         Player ownerPlayer = getOwnerPlayer();
         return ownerPlayer != null && ownerPlayer.isAlliedTo(target);
     }

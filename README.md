@@ -49,6 +49,7 @@ Turrets do not target their owner or the owner's allies. Allies come from:
 - vanilla teams
 - FTB Teams parties and allies.
 - Open Parties and Claims parties and allied parties.
+- Villager Recruits factions and allied factions (1.20.1). Turrets will not target your recruits.
 
 Allies can also open and manage your turrets. Turn that off with `alliesHavePerms`.
 

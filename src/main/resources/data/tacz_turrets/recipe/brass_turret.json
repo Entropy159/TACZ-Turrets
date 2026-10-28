@@ -1,0 +1,49 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "brass",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/brass"
+      },
+      "count": 24
+    },
+    {
+      "item": {
+        "item": "create:brass_casing"
+      },
+      "count": 4
+    },
+    {
+      "item": {
+        "item": "create:precision_mechanism"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "create:cogwheel"
+      },
+      "count": 1
+    },
+    {
+      "item": {
+        "item": "create:andesite_alloy"
+      },
+      "count": 16
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "id": "tacz_turrets:brass_turret"
+    }
+  }
+}

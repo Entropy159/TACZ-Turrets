@@ -191,9 +191,17 @@ public class TACZTurretsConfig {
             .comment("Items that can repair turrets. Accepts item ids and #item tags.")
             .defineList("repairItems", List.of("minecraft:iron_bars"), RegistryFilter::isValidEntry);
 
-    public static final BooleanValue REQUIRE_ENERGY = BUILDER
-            .comment("Turrets need FE to run.")
-            .define("requireEnergy", false);
+    public static final BooleanValue ROTATION_FIRE_RATE = TurretType.BRASS.isAvailable() ? BUILDER
+            .comment("Brass turrets fire slower when their cogwheel turns slowly.")
+            .define("rotationFireRate", true) : null;
+
+    public static final IntValue FULL_FIRE_RATE_ROTATION = TurretType.BRASS.isAvailable() ? BUILDER
+            .comment("Rotation speed in RPM at which brass turrets reach their full fire rate.")
+            .defineInRange("fullFireRateRotation", 64, 1, 256) : null;
+
+    public static final BooleanValue FIRE_RATE_STATS = BUILDER
+            .comment("Turrets use their type's fireRate stat. If false, turrets fire at their gun's normal speed.")
+            .define("fireRateStats", false);
 
     public static final BooleanValue LOCK_ON_DELAY = BUILDER
             .comment("Turrets lock on for a second before firing.")
@@ -275,6 +283,10 @@ public class TACZTurretsConfig {
             .comment("Reload speed multiplier for sentry turrets.")
             .defineInRange("sentryReloadSpeedMultiplier", 0.8D, 0.01D, 10.0D);
 
+    public static final DoubleValue SENTRY_FIRE_RATE_MULTIPLIER = BUILDER
+            .comment("Fire rate multiplier for sentry turrets.")
+            .defineInRange("sentryFireRateMultiplier", 1.0D, 0.01D, 10.0D);
+
     public static final BooleanValue SENTRY_DIFFICULTY_SCALING = BUILDER
             .comment("Sentry turret health and damage follow the world difficulty.")
             .define("sentryDifficultyScaling", false);
@@ -302,6 +314,10 @@ public class TACZTurretsConfig {
     public static final BooleanValue SENTRY_MATERIAL_DROPS = BUILDER
             .comment("Destroyed sentry turrets drop crafting materials.")
             .define("sentryMaterialDrops", true);
+
+    public static final BooleanValue MODDED_SENTRY_TURRETS = BUILDER
+            .comment("Mod addon turrets can spawn as sentry turrets.")
+            .define("moddedSentryTurrets", false);
 
     public static final BooleanValue SENTRY_PASSIVE_HEALING = BUILDER
             .comment("Sentry turrets heal over time.")
@@ -339,16 +355,20 @@ public class TACZTurretsConfig {
     public static final BooleanValue IDENTICAL_TURRETS = COMMON_BUILDER
     *///?}
             .comment("All turrets use the modern turret's stats and recipe, so turret types only change the look.")
-            .define("identicalTurrets", true);
+            .define("identicalTurrets", false);
 
-    private static final TurretStats[] STATS = Arrays.stream(TurretType.values()).map(TurretStats::new).toArray(TurretStats[]::new);
+    private static final TurretStats[] STATS = Arrays.stream(TurretType.values()).map(type -> type.isAvailable() ? new TurretStats(type) : null).toArray(TurretStats[]::new);
 
     public static TurretStats stats(TurretType type) {
-        return STATS[IDENTICAL_TURRETS.get() ? TurretType.MODERN.ordinal() : type.ordinal()];
+        return STATS[IDENTICAL_TURRETS.get() || !type.isAvailable() ? TurretType.MODERN.ordinal() : type.ordinal()];
     }
 
     public static boolean enabled(TurretType type) {
-        return STATS[type.ordinal()].enabled.get();
+        return type.isAvailable() && STATS[type.ordinal()].enabled.get();
+    }
+
+    public static boolean requirePower(TurretType type) {
+        return type.isAvailable() && STATS[type.ordinal()].requirePower.get();
     }
 
     public static int maxRange() {
@@ -359,6 +379,7 @@ public class TACZTurretsConfig {
 
     public static final class TurretStats {
         public final BooleanValue enabled;
+        public final BooleanValue requirePower;
         public final IntValue health;
         public final DoubleValue armor;
         public final IntValue range;
@@ -366,6 +387,7 @@ public class TACZTurretsConfig {
         public final DoubleValue distanceInaccuracy;
         public final DoubleValue randomInaccuracy;
         public final DoubleValue reloadSpeed;
+        public final DoubleValue fireRate;
         public final IntValue slotRows;
         public final IntValue slotLength;
         public final IntValue energyCapacity;
@@ -385,6 +407,7 @@ public class TACZTurretsConfig {
             COMMON_BUILDER.pop();
             BUILDER.push(type.id());
             *///?}
+            requirePower = BUILDER.comment(type == TurretType.BRASS ? "Needs rotational power from a Create small cogwheel placed next to it." : "Needs FE to run.").define("requirePower", type.isModded());
             health = BUILDER.comment("Health of the turret.").defineInRange("health", type.defaultHealth, 10, 1000);
             armor = BUILDER.comment("Armor points of the turret.").defineInRange("armor", type.defaultArmor, 0.0D, 1000.0D);
             range = BUILDER.comment("Detection and engagement range in blocks.").defineInRange("range", type.defaultRange, 8, 1000);
@@ -392,6 +415,7 @@ public class TACZTurretsConfig {
             distanceInaccuracy = BUILDER.comment("Distance inaccuracy at maximum range. 0 always hits.").defineInRange("distanceInaccuracy", type.defaultInaccuracy, 0.0D, 45.0D);
             randomInaccuracy = BUILDER.comment("Random inaccuracy. 0 always hits.").defineInRange("randomInaccuracy", type.defaultInaccuracy, 0.0D, 45.0D);
             reloadSpeed = BUILDER.comment("Reload speed multiplier. 1.0 is the gun's normal speed.").defineInRange("reloadSpeed", type.defaultReloadSpeed, 1.0D, 10.0D);
+            fireRate = BUILDER.comment("Fire rate multiplier. 1.0 is the gun's normal speed. Needs fireRateStats.").defineInRange("fireRate", type.defaultFireRate, 0.1D, 10.0D);
             slotRows = BUILDER.comment("Rows of ammo slots in the turret screen.").defineInRange("slotRows", 2, 1, 6);
             slotLength = BUILDER.comment("Ammo slots per row in the turret screen.").defineInRange("slotLength", 5, 1, 9);
             energyCapacity = BUILDER.comment("Energy buffer size.").defineInRange("energyCapacity", 10000, 1, 1000000000);

@@ -80,7 +80,7 @@ public record SentryLoadout(List<TurretType> types, boolean hostile, List<GunEnt
     }
 
     public List<TurretType> enabledTypes() {
-        return types.stream().filter(TACZTurretsConfig::enabled).toList();
+        return types.stream().filter(type -> TACZTurretsConfig.enabled(type) && (!type.isModded() || TACZTurretsConfig.MODDED_SENTRY_TURRETS.get())).toList();
     }
 
     public void apply(TurretEntity turret, Holder<Biome> biome) {

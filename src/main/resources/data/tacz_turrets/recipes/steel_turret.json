@@ -1,0 +1,55 @@
+{
+  "conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "steel",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/steel"
+      },
+      "count": 24
+    },
+    {
+      "item": {
+        "item": "immersiveengineering:plate_steel"
+      },
+      "count": 8
+    },
+    {
+      "item": {
+        "item": "immersiveengineering:component_steel"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "immersiveengineering:light_engineering"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "immersiveengineering:radiator"
+      },
+      "count": 1
+    },
+    {
+      "item": {
+        "item": "immersiveengineering:treated_wood_horizontal"
+      },
+      "count": 4
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "item": "tacz_turrets:steel_turret"
+    }
+  }
+}

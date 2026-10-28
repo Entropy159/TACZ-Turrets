@@ -28,6 +28,13 @@ repositories {
     maven("https://maven.ftb.dev/releases") {
         content { includeGroup("dev.ftb.mods") }
     }
+    maven("https://maven.createmod.net") {
+        content {
+            includeGroup("com.simibubi.create")
+            includeGroup("net.createmod.ponder")
+            includeGroup("dev.engine-room.flywheel")
+        }
+    }
     exclusiveContent {
         forRepository { maven("https://api.modrinth.com/maven") }
         filter { includeGroup("maven.modrinth") }
@@ -56,6 +63,9 @@ dependencies {
     modCompileOnly("dev.ftb.mods:ftb-teams-$loader:${mod.dep("ftbteams")}") { isTransitive = false }
     modCompileOnly("maven.modrinth:open-parties-and-claims:${mod.dep("opac")}") { isTransitive = false }
     if (isForge) modCompileOnly("maven.modrinth:villager-recruits:${mod.dep("recruits")}") { isTransitive = false }
+    modCompileOnly("com.simibubi.create:create-$minecraft:${mod.dep("create")}:slim") { isTransitive = false }
+    modCompileOnly("net.createmod.ponder:${mod.dep("ponder")}") { isTransitive = false }
+    modCompileOnly("dev.engine-room.flywheel:${mod.dep("flywheel")}") { isTransitive = false }
     modLocalRuntime("mezz.jei:jei-$minecraft-$loader:${mod.dep("jei")}") { isTransitive = false }
 
     val taczNested = layout.buildDirectory.dir("tacz-jarjar/${mod.dep("tacz")}").get().asFile

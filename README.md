@@ -55,17 +55,30 @@ Allies can also open and manage your turrets. Turn that off with `alliesHavePerm
 
 ## Turrets
 
-Turrets are crafted at the Turret Workbench. By default, they all use the Modern turret's stats and recipe. Turn off `identicalTurrets` to use the stats below.
-
-| Turret | Health | Armor | Range | Reload | Role |
-| --- | --- | --- | --- | --- | --- |
-| Scrap | 120 | 2 | 48 | 1x | Cheap, inaccurate |
-| Modern | 200 | 6 | 64 | 1x | All-rounder |
-| Industrial | 300 | 10 | 56 | 1.1x | Tough, less accurate |
-| Sci-Fi | 180 | 4 | 80 | 1.15x | Long range, accurate |
-| Tactical | 220 | 8 | 72 | 1.25x | Long range, accurate |
+Turrets are crafted at the Turret Workbench.
 
 Sniper guns double a turret's range.
+
+The Brass turret is for the [Create](https://www.curseforge.com/minecraft/mc-mods/create) mod and requires rotational power. It fires slower at low rotation speeds and reaches its full fire rate at 64 RPM.
+
+The Steel turret is for the [Immersive Engineering](https://www.curseforge.com/minecraft/mc-mods/immersive-engineering) mod.
+
+The Basic, Advanced, Elite and Ultimate turrets are for the [Mekanism](https://www.curseforge.com/minecraft/mc-mods/mekanism) mod. Each tier is crafted from the tier below it.
+
+Each turret uses the stats below. Fire rate stats are off by default and need `fireRateStats`. Turn on `identicalTurrets` to give them all the Modern turret's stats and recipe.
+
+| Turret | Health | Armor | Range | Reload | Fire rate |
+| --- | --- | --- | --- | --- | --- |
+| Scrap | 120 | 2 | 48 | 1x | 0.8x |
+| Modern | 200 | 6 | 64 | 1x | 1x |
+| Industrial | 300 | 10 | 56 | 1.1x | 0.9x |
+| Tactical | 220 | 8 | 72 | 1.25x | 1.15x |
+| Brass | 200 | 6 | 64 | 1x | 1x |
+| Steel | 200 | 6 | 64 | 1x | 1x |
+| Basic | 200 | 6 | 64 | 1x | 1x |
+| Advanced | 250 | 8 | 72 | 1.1x | 1.05x |
+| Elite | 300 | 10 | 80 | 1.2x | 1.1x |
+| Ultimate | 400 | 14 | 96 | 1.35x | 1.2x |
 
 ## Sentry Turrets
 
@@ -97,7 +110,7 @@ Loadouts are datapack files in `data/<namespace>/sentry_loadouts/`. A sentry wit
 
 | Field | Default | Meaning |
 | --- | --- | --- |
-| `types` | all | Turret types to pick from: `modern`, `industrial`, `scifi`, `scrap`, `tactical`. |
+| `types` | all | Turret types to pick from: `modern`, `industrial`, `scrap`, `tactical`, `brass` (Create), `steel` (Immersive Engineering), `basic`, `advanced`, `elite`, `ultimate` (Mekanism). Mod addon turrets only spawn when `moddedSentryTurrets` is on. |
 | `hostile` | `true` | `true` shoots players on sight, `false` only shoots back. |
 | `guns` | required | Weighted list. An entry names a gun (`"gun": "tacz:ak47"`), a TACZ gun type (`"type": "rifle"`), or neither for any gun. |
 | `ammo` | infinite | Rounds it spawns with, as `{"min": 60, "max": 180}`. Leave it out for infinite ammo. |
@@ -144,7 +157,7 @@ Spawn rules are datapack files in `data/<namespace>/sentry_spawns/`. A spawn rul
 
 ## Config
 
-- Server: How turrets and sentry turrets target, fight, use ammo and take damage, plus each turret type's stats. Turrets can also be set to run on FE from the block under them.
+- Server: How turrets and sentry turrets target, fight, use ammo and take damage, plus each turret type's stats. Each turret type can be set to need power with `requirePower`.
 - Client: How turrets look on your screen, such as health bar style and color.
 
 The entity tags `tacz_turrets:turret_targets` and `tacz_turrets:turret_ignored` can be used for what turrets will or will not target.
@@ -162,3 +175,9 @@ The jars will be in `build/libs/<version>/`.
 ## Credits
 
 Huge thanks to Corrinedev for making [TACZ NPCs](https://modrinth.com/mod/tacz-npcs), which was a big help for seeing how things work.
+
+The Brass turret's cogwheel model and texture are from [Create](https://github.com/Creators-of-Create/Create).
+
+The Steel turret's textures are from [Immersive Engineering](https://github.com/BluSunrize/ImmersiveEngineering).
+
+The Mekanism turrets' textures are from [Mekanism](https://github.com/mekanism/Mekanism).

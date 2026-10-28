@@ -1,6 +1,7 @@
 package com.entropy.tacz_turrets.turret;
 
 import com.entropy.tacz_turrets.TACZTurrets;
+import com.entropy.tacz_turrets.compat.CreateCompat;
 import com.entropy.tacz_turrets.compat.FTBTeamsCompat;
 import com.entropy.tacz_turrets.compat.OpenPACCompat;
 //? if forge
@@ -177,6 +178,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<ItemStack> PAINT = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Optional<UUID>> OWNER_ID = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Float> ROTATION_SPEED = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.FLOAT);
     private static final String PAINT_TAG = "Paint";
     public static final int DEATH_MESSAGES = 3;
     private boolean gunDrawn = false;
@@ -234,6 +236,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         entityData.define(TYPE, TurretType.MODERN.ordinal());
         entityData.define(PAINT, ItemStack.EMPTY);
         entityData.define(OWNER_ID, Optional.empty());
+        entityData.define(ROTATION_SPEED, 0.0F);
     }
     //?} else {
     /*protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
@@ -244,6 +247,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         builder.define(TYPE, TurretType.MODERN.ordinal());
         builder.define(PAINT, ItemStack.EMPTY);
         builder.define(OWNER_ID, Optional.empty());
+        builder.define(ROTATION_SPEED, 0.0F);
     }
     *///?}
 
@@ -298,7 +302,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return lazyInventory.cast();
         }
-        if (cap == ForgeCapabilities.ENERGY) {
+        if (cap == ForgeCapabilities.ENERGY && usesEnergy()) {
             return lazyEnergy.cast();
         }
         return super.getCapability(cap, side);
@@ -443,6 +447,15 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     public double reloadSpeed() {
         return stats().reloadSpeed.get() * (isSentry() ? TACZTurretsConfig.SENTRY_RELOAD_SPEED_MULTIPLIER.get() : 1.0D);
+    }
+
+    public double fireRate() {
+        double rate = TACZTurretsConfig.FIRE_RATE_STATS.get() ? stats().fireRate.get() : 1.0D;
+        if (isSentry()) return rate * TACZTurretsConfig.SENTRY_FIRE_RATE_MULTIPLIER.get();
+        if (hasCog() && getRotationSpeed() != 0.0F && TACZTurretsConfig.ROTATION_FIRE_RATE.get()) {
+            rate *= Math.min(1.0D, Math.abs(getRotationSpeed()) / TACZTurretsConfig.FULL_FIRE_RATE_ROTATION.get());
+        }
+        return rate;
     }
 
     //? if forge {
@@ -592,7 +605,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
                 lastShotTick = tickCount;
                 if (!usesMagazine() && !hasInfiniteAmmo()) useRound();
                 if (TACZTurretsConfig.TURRET_RECOIL.get()) entityData.set(RECOIL, RECOIL_TICKS);
-                if (TACZTurretsConfig.REQUIRE_ENERGY.get() && !isSentry()) energy.consume(stats().energyPerShot.get());
+                if (usesEnergy()) energy.consume(stats().energyPerShot.get());
             }
             case NEED_BOLT -> gunOperator.bolt();
             case NO_AMMO -> {
@@ -712,13 +725,17 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         return TACZTurretsConfig.PULL_AMMO_FROM_STORAGE.get() && !hasInfiniteAmmo() && isEnabled() && !hasCreativeAmmo();
     }
 
+    public boolean usesEnergy() {
+        return !isSentry() && getTurretType() != TurretType.BRASS && TACZTurretsConfig.requirePower(getTurretType());
+    }
+
     public boolean hasEnoughEnergy() {
-        if (!TACZTurretsConfig.REQUIRE_ENERGY.get() || isSentry()) return true;
+        if (!usesEnergy()) return true;
         return energy.getEnergyStored() >= Math.max(1, stats().energyPerShot.get());
     }
 
     private void tickEnergy() {
-        if (!TACZTurretsConfig.REQUIRE_ENERGY.get() || isSentry()) return;
+        if (!usesEnergy()) return;
         energy.setLimits(stats().energyCapacity.get(), stats().energyTransferRate.get());
         if (stats().energyIdleDrain.get() > 0 && !enableType.shouldDisable(level(), blockPosition())) {
             energy.consume(stats().energyIdleDrain.get());
@@ -738,6 +755,22 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         int available = source.extractEnergy(space, true);
         int accepted = energy.receiveEnergy(available, true);
         if (accepted > 0) energy.receiveEnergy(source.extractEnergy(accepted, false), false);
+    }
+
+    public float getRotationSpeed() {
+        return entityData.get(ROTATION_SPEED);
+    }
+
+    private boolean hasCog() {
+        return getTurretType() == TurretType.BRASS && TurretType.BRASS.isAvailable();
+    }
+
+    public boolean hasRotation() {
+        return !hasCog() || isSentry() || !TACZTurretsConfig.requirePower(TurretType.BRASS) || getRotationSpeed() != 0.0F;
+    }
+
+    private void tickRotation() {
+        entityData.set(ROTATION_SPEED, hasCog() ? CreateCompat.cogSpeed(level(), blockPosition()) : 0.0F);
     }
 
     private void syncAttributes() {
@@ -813,6 +846,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             int recoil = entityData.get(RECOIL);
             if (recoil > 0) entityData.set(RECOIL, recoil - 1);
             tickEnergy();
+            tickRotation();
             syncAttributes();
             tickPassiveHealing();
             tickLockOn();
@@ -844,7 +878,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private boolean shouldDisable() {
-        return enableType.shouldDisable(level(), blockPosition()) || !hasEnoughEnergy();
+        return enableType.shouldDisable(level(), blockPosition()) || !hasEnoughEnergy() || !hasRotation();
     }
 
     @Override

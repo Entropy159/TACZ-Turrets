@@ -1,0 +1,43 @@
+{
+  "conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "basic",
+      "identical": false
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/steel"
+      },
+      "count": 24
+    },
+    {
+      "item": {
+        "tag": "forge:ingots/osmium"
+      },
+      "count": 8
+    },
+    {
+      "item": {
+        "item": "mekanism:basic_control_circuit"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "mekanism:steel_casing"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "item": "tacz_turrets:basic_turret"
+    }
+  }
+}

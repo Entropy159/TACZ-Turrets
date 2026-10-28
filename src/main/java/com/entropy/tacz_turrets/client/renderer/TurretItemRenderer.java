@@ -49,7 +49,7 @@ public class TurretItemRenderer extends GeoItemRenderer<TurretItem> {
 
             @Override
             public void setCustomAnimations(TurretItem item, long instanceId, AnimationState<TurretItem> animationState) {
-                for (String name : new String[] {"head", "center"}) {
+                for (String name : new String[] {"head", "center", "cog"}) {
                     var bone = getAnimationProcessor().getBone(name);
                     if (bone == null) continue;
                     bone.setRotX(bone.getInitialSnapshot().getRotX());

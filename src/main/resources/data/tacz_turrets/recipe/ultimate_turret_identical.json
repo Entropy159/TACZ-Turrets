@@ -1,0 +1,37 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "tacz_turrets:turret_enabled",
+      "turret": "ultimate",
+      "identical": true
+    }
+  ],
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/iron"
+      },
+      "count": 48
+    },
+    {
+      "item": {
+        "tag": "c:ingots/gold"
+      },
+      "count": 8
+    },
+    {
+      "item": {
+        "tag": "c:dusts/redstone"
+      },
+      "count": 8
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:turrets",
+    "item": {
+      "id": "tacz_turrets:ultimate_turret"
+    }
+  }
+}

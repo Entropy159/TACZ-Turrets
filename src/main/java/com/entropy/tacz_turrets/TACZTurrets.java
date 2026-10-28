@@ -60,7 +60,7 @@ public class TACZTurrets {
         modEventBus.addListener(TACZTurretsNetwork::register);
         modEventBus.addListener((RegisterCapabilitiesEvent event) -> {
             event.registerEntity(Capabilities.ItemHandler.ENTITY, EntityTypeRegistry.TURRET.get(), (turret, side) -> turret.getInventory());
-            event.registerEntity(Capabilities.EnergyStorage.ENTITY, EntityTypeRegistry.TURRET.get(), (turret, side) -> turret.getEnergyStorage());
+            event.registerEntity(Capabilities.EnergyStorage.ENTITY, EntityTypeRegistry.TURRET.get(), (turret, side) -> turret.usesEnergy() ? turret.getEnergyStorage() : null);
         });
     *///?}
         EntityTypeRegistry.TYPES.register(modEventBus);

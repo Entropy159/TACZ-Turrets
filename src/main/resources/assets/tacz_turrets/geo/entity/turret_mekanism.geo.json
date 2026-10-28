@@ -1,0 +1,58 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.turret_mekanism",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "base",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-6, 0, -6], "size": [12, 3, 12], "uv": [0, 0]},
+						{"origin": [-3, 3, -3], "size": [6, 3, 6], "uv": [24, 36]}
+					]
+				},
+				{
+					"name": "center",
+					"parent": "base",
+					"pivot": [0, 6, 0],
+					"cubes": [
+						{"origin": [-5, 6, -5], "size": [10, 1, 10], "uv": [0, 18]},
+						{"origin": [-7, 7, -3], "size": [14, 1, 6], "uv": [0, 29]},
+						{"origin": [5, 8, -3], "size": [2, 7, 6], "uv": [40, 18]},
+						{"origin": [-7, 8, -3], "size": [2, 7, 6], "uv": [40, 18], "mirror": true},
+						{"origin": [7, 12, -1], "size": [1, 2, 2], "uv": [56, 0]},
+						{"origin": [-8, 12, -1], "size": [1, 2, 2], "uv": [56, 0], "mirror": true}
+					]
+				},
+				{
+					"name": "head",
+					"pivot": [0, 13, 0],
+					"cubes": [
+						{"origin": [2, 11, -5], "size": [3, 2, 8], "uv": [0, 36]},
+						{"origin": [-5, 11, -5], "size": [3, 2, 8], "uv": [0, 36], "mirror": true},
+						{"origin": [-2, 11, 1], "size": [4, 1, 2], "uv": [48, 4]},
+						{"origin": [-5, 13, -4], "size": [3, 3, 4], "uv": [48, 7]}
+					]
+				},
+				{
+					"name": "gun",
+					"parent": "head",
+					"pivot": [0, 13, 0]
+				},
+				{
+					"name": "laser",
+					"parent": "head",
+					"pivot": [-4, 15, -4]
+				}
+			]
+		}
+	]
+}

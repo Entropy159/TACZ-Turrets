@@ -1,9 +1,11 @@
 package com.entropy.tacz_turrets.client.model;
 
 import com.entropy.tacz_turrets.TACZTurrets;
+import com.entropy.tacz_turrets.client.CreateCogClock;
 import com.entropy.tacz_turrets.client.renderer.TurretRenderer;
 import com.entropy.tacz_turrets.turret.TurretEntity;
 import com.entropy.tacz_turrets.turret.TurretState;
+import com.entropy.tacz_turrets.turret.TurretType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.cache.object.GeoBone;
@@ -44,6 +46,10 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
         var center = getAnimationProcessor().getBone("center");
         if (center != null) {
             center.setRotY(yaw * Mth.DEG_TO_RAD);
+        }
+        var cog = getAnimationProcessor().getBone("cog");
+        if (cog != null && TurretType.BRASS.isAvailable()) {
+            cog.setRotY(sign * CreateCogClock.degrees(turret, animationState.getPartialTick()) * Mth.DEG_TO_RAD);
         }
         if (getAnimationProcessor().getBone("laser") instanceof GeoBone laser) {
             laser.setTrackingMatrices(true);

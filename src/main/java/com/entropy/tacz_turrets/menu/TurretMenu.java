@@ -1,6 +1,5 @@
 package com.entropy.tacz_turrets.menu;
 
-import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.registry.MenuRegistry;
 import com.entropy.tacz_turrets.turret.PlayerTargeting;
 import com.entropy.tacz_turrets.turret.TurretEnableType;
@@ -229,7 +228,7 @@ public class TurretMenu extends AbstractContainerMenu {
                 case DATA_MAX_ENERGY_HIGH -> (turret.getMaxEnergyStored() >>> 16) & 0xFFFF;
                 case DATA_ENABLE_TYPE -> turret.getEnableType().ordinal();
                 case DATA_MODE -> turret.getMode().ordinal();
-                case DATA_USES_ENERGY -> TACZTurretsConfig.REQUIRE_ENERGY.get() ? 1 : 0;
+                case DATA_USES_ENERGY -> turret.usesEnergy() ? 1 : 0;
                 case DATA_PLAYER_TARGETING -> turret.getPlayerTargeting().ordinal();
                 default -> 0;
             };

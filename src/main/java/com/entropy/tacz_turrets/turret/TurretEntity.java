@@ -664,7 +664,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     @Nullable
     private BlockEntity getSupplyBlockEntity() {
         BlockEntity blockEntity = level().getBlockEntity(blockPosition());
-        return blockEntity == null ? level().getBlockEntity(blockPosition().below()) : blockEntity;
+        return blockEntity == null ? level().getBlockEntity(isCeiling() ? blockPosition().above() : blockPosition().below()) : blockEntity;
+    }
+
+    private Direction getSupplySide() {
+        return isCeiling() ? Direction.DOWN : Direction.UP;
     }
 
     //? if forge {
@@ -672,7 +676,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private <T> T getSupplyCapability(Capability<T> capability) {
         BlockEntity blockEntity = getSupplyBlockEntity();
         if (blockEntity == null) return null;
-        LazyOptional<T> sided = blockEntity.getCapability(capability, Direction.UP);
+        LazyOptional<T> sided = blockEntity.getCapability(capability, getSupplySide());
         return (sided.isPresent() ? sided : blockEntity.getCapability(capability)).orElse(null);
     }
     //?} else {
@@ -680,7 +684,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private <T> T getSupplyCapability(BlockCapability<T, Direction> capability) {
         BlockEntity blockEntity = getSupplyBlockEntity();
         if (blockEntity == null) return null;
-        T sided = level().getCapability(capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, Direction.UP);
+        T sided = level().getCapability(capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, getSupplySide());
         return sided != null ? sided : level().getCapability(capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, null);
     }
     *///?}

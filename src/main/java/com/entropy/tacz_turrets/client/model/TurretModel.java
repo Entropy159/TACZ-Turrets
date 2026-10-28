@@ -8,15 +8,14 @@ import com.entropy.tacz_turrets.turret.TurretState;
 import com.entropy.tacz_turrets.turret.TurretType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.joml.Vector2f;
 import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.constant.DataTickets;
 //? if forge {
 import software.bernie.geckolib.core.animation.AnimationState;
 //?} else {
 /*import software.bernie.geckolib.animation.AnimationState;
 *///?}
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.model.data.EntityModelData;
 
 public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
     public TurretModel() {
@@ -36,11 +35,10 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
     @Override
     public void setCustomAnimations(TurretEntity turret, long instanceId, AnimationState<TurretEntity> animationState) {
         var head = getAnimationProcessor().getBone("head");
-        EntityModelData data = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
-        float sign = TurretRenderer.isFlipped(turret) ? -1.0F : 1.0F;
-        float yaw = -sign * turret.getYHeadRot() + 180;
+        Vector2f aim = TurretRenderer.aim(turret, turret.getYHeadRot(), Mth.lerp(animationState.getPartialTick(), turret.xRotO, turret.getXRot()));
+        float yaw = 180 - aim.x;
         if (head != null) {
-            head.setRotX((sign * data.headPitch() - turret.getRecoilDegrees(animationState.getPartialTick())) * Mth.DEG_TO_RAD);
+            head.setRotX((-aim.y - turret.getRecoilDegrees(animationState.getPartialTick())) * Mth.DEG_TO_RAD);
             head.setRotY(yaw * Mth.DEG_TO_RAD);
         }
         var center = getAnimationProcessor().getBone("center");
@@ -49,7 +47,7 @@ public class TurretModel extends DefaultedEntityGeoModel<TurretEntity> {
         }
         var cog = getAnimationProcessor().getBone("cog");
         if (cog != null && TurretType.BRASS.isAvailable()) {
-            cog.setRotY(sign * CreateCogClock.degrees(turret, animationState.getPartialTick()) * Mth.DEG_TO_RAD);
+            cog.setRotY(TurretRenderer.up(turret).getAxisDirection().getStep() * CreateCogClock.degrees(turret, animationState.getPartialTick()) * Mth.DEG_TO_RAD);
         }
         if (getAnimationProcessor().getBone("laser") instanceof GeoBone laser) {
             laser.setTrackingMatrices(true);

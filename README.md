@@ -14,7 +14,7 @@ Turrets that fire guns from [TACZ](https://www.curseforge.com/minecraft/mc-mods/
 
 ## Controls
 
-- **Place it** by right-clicking a block. Use the bottom of a block to hang the turret upside down from the ceiling.
+- **Place it** by right-clicking a block. Use the bottom of a block to hang the turret upside down from the ceiling, or the side of a block to mount it on a wall.
 - **Open it** by right-clicking the turret. Put a gun in the gun slot, ammo in the slots below it, and a TACZ laser sight next to the gun slot.
 - **Pick it up** by crouching and right-clicking. You get the turret back with its gun, laser and ammo.
 - **Paint it** by crouching and right-clicking with a dye or a banner. A dye recolors the turret's panels, and a banner puts its design on each panel. The paint stays on the turret when you pick it up. Crouch and right-click with an axe to scrape it off.
@@ -63,7 +63,7 @@ The Brass turret is for the [Create](https://www.curseforge.com/minecraft/mc-mod
 
 The Steel turret is for the [Immersive Engineering](https://www.curseforge.com/minecraft/mc-mods/immersive-engineering) mod.
 
-The Basic, Advanced, Elite and Ultimate turrets are for the [Mekanism](https://www.curseforge.com/minecraft/mc-mods/mekanism) mod. Each tier is crafted from the tier below it.
+The Basic, Advanced, Elite and Ultimate turrets are for the [Mekanism](https://www.curseforge.com/minecraft/mc-mods/mekanism) mod.
 
 Each turret uses the stats below. Fire rate stats are off by default and need `fireRateStats`. Turn on `identicalTurrets` to give them all the Modern turret's stats and recipe.
 
@@ -141,7 +141,8 @@ Spawn rules are datapack files in `data/<namespace>/sentry_spawns/`. A spawn rul
   "structures": ["minecraft:pillager_outpost"],
   "loadout": "tacz_turrets:default",
   "count": {"min": 2, "max": 4},
-  "ceiling_chance": 0.2
+  "ceiling_chance": 0.2,
+  "wall_chance": 0.2
 }
 ```
 
@@ -154,6 +155,7 @@ Spawn rules are datapack files in `data/<namespace>/sentry_spawns/`. A spawn rul
 | `chance` | `1` | Chance per structure, or per chunk for `surface` and `cave`. |
 | `count` | `1` | Sentries per structure or chunk, as `{"min": 1, "max": 3}`. |
 | `ceiling_chance` | `0` | Chance a sentry hangs from a ceiling. Only for `structure` and `cave`. |
+| `wall_chance` | `0` | Chance a sentry is mounted on a wall. Only for `structure` and `cave`. The two chances together can't go over `1`, the rest spawn on the floor. |
 
 ## Config
 

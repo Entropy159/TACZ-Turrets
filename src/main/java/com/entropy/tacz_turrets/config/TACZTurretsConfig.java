@@ -63,9 +63,17 @@ public class TACZTurretsConfig {
             .comment("Destroyed turrets drop their gun and ammo.")
             .define("dropItemsOnDeath", true);
 
-    public static final BooleanValue RETURN_CAMOS = BUILDER
-            .comment("Get a turret's camo back when it is scraped off, replaced or destroyed.")
-            .define("returnCamos", false);
+    public static final BooleanValue CONSUME_CAMOS = BUILDER
+            .comment("Applying a camo to a turret consumes the camo.")
+            .define("consumeCamos", true);
+
+    public static final BooleanValue CONSUME_DYES = BUILDER
+            .comment("Applying a dye to a turret consumes the dye.")
+            .define("consumeDyes", true);
+
+    public static final BooleanValue CONSUME_BANNERS = BUILDER
+            .comment("Applying a banner to a turret consumes the banner.")
+            .define("consumeBanners", true);
 
     public static final BooleanValue PICKUP_ITEMS_TO_INVENTORY = BUILDER
             .comment("Picking up a turret puts its gun and ammo in your inventory. If false, they drop on the ground.")

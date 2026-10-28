@@ -2,5 +2,6 @@
   "where": "cave",
   "biomes": ["#minecraft:is_overworld"],
   "chance": 0.01,
-  "ceiling_chance": 0.5
+  "ceiling_chance": 0.35,
+  "wall_chance": 0.3
 }

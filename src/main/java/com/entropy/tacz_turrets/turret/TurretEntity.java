@@ -69,6 +69,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
+import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.monster.Monster;
@@ -129,6 +130,9 @@ import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyPlayersSensor;
 import net.tslat.smartbrainlib.object.FreePositionTracker;
 import net.tslat.smartbrainlib.util.BrainUtils;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoEntity;
 //? if forge {
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -172,9 +176,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private static final int LOCK_ON_TICKS = 20;
     private static final int LOCK_ON_GAP = 20;
     private static final int PAN_COOLDOWN = 20;
+    private static final float IDLE_WALL_TILT = 45.0F;
     private static final EntityDataAccessor<Integer> RECOIL = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> CEILING = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Direction> ATTACH_FACE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.DIRECTION);
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<ItemStack> PAINT = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Optional<UUID>> OWNER_ID = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.OPTIONAL_UUID);
@@ -220,6 +225,17 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     public TurretEntity(EntityType<? extends TurretEntity> type, Level level) {
         super(type, level);
+        lookControl = new LookControl(this) {
+            @Override
+            public void tick() {
+                if (getAttachFace().getAxis() == Direction.Axis.Y) {
+                    super.tick();
+                } else if (lookAtCooldown > 0) {
+                    lookAtCooldown--;
+                    turnTowards(new Vector3f((float) (wantedX - getX()), (float) (wantedY - getEyeY()), (float) (wantedZ - getZ())), yMaxRotSpeed);
+                }
+            }
+        };
         setYRot(0.0F);
         setYHeadRot(0.0F);
         setYBodyRot(0.0F);
@@ -232,7 +248,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         super.defineSynchedData();
         entityData.define(STATE, TurretState.NO_GUN.ordinal());
         entityData.define(RECOIL, 0);
-        entityData.define(CEILING, false);
+        entityData.define(ATTACH_FACE, Direction.DOWN);
         entityData.define(TYPE, TurretType.MODERN.ordinal());
         entityData.define(PAINT, ItemStack.EMPTY);
         entityData.define(OWNER_ID, Optional.empty());
@@ -243,7 +259,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         super.defineSynchedData(builder);
         builder.define(STATE, TurretState.NO_GUN.ordinal());
         builder.define(RECOIL, 0);
-        builder.define(CEILING, false);
+        builder.define(ATTACH_FACE, Direction.DOWN);
         builder.define(TYPE, TurretType.MODERN.ordinal());
         builder.define(PAINT, ItemStack.EMPTY);
         builder.define(OWNER_ID, Optional.empty());
@@ -265,34 +281,59 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         return getTurretType().stats();
     }
 
-    public boolean isCeiling() {
-        return entityData.get(CEILING);
+    public Direction getAttachFace() {
+        return entityData.get(ATTACH_FACE);
     }
 
-    public void setCeiling(boolean ceiling) {
-        entityData.set(CEILING, ceiling);
+    public void setAttachFace(Direction face) {
+        entityData.set(ATTACH_FACE, face);
+    }
+
+    public static Quaternionf frame(Direction up) {
+        return up == Direction.DOWN ? new Quaternionf().rotationZ(Mth.PI) : new Quaternionf().rotationTo(new Vector3f(0.0F, 1.0F, 0.0F), up.step());
+    }
+
+    public static Vector2f toLocal(Direction up, float yaw, float pitch) {
+        Vector3f look = frame(up).conjugate().transform(Vec3.directionFromRotation(pitch, yaw).toVector3f());
+        return new Vector2f((float) Math.toDegrees(Math.atan2(-look.x, look.z)), (float) Math.toDegrees(Math.asin(Mth.clamp(-look.y, -1.0F, 1.0F))));
+    }
+
+    private void turnTowards(Vector3f target, float maxDegrees) {
+        Vector3f look = Vec3.directionFromRotation(getXRot(), getYHeadRot()).toVector3f();
+        float angle = look.angle(target.normalize());
+        if (!(angle > 1.0E-4F)) return;
+        new Quaternionf().slerp(new Quaternionf().rotationTo(look, target), Math.min(1.0F, maxDegrees * Mth.DEG_TO_RAD / angle)).transform(look);
+        setYHeadRot((float) Math.toDegrees(Math.atan2(-look.x, look.z)));
+        setXRot((float) Math.toDegrees(Math.asin(Mth.clamp(-look.y, -1.0F, 1.0F))));
+    }
+
+    private Vec3 idleLookDirection() {
+        Direction up = getAttachFace().getOpposite();
+        boolean wall = up.getAxis() != Direction.Axis.Y;
+        float yaw = wall ? toLocal(up, getYHeadRot(), getXRot()).x + (random.nextBoolean() ? 1.0F : -1.0F) * Mth.randomBetween(random, 30.0F, 90.0F) : random.nextFloat() * 360.0F;
+        return new Vec3(frame(up).transform(Vec3.directionFromRotation(wall ? -IDLE_WALL_TILT : 0.0F, yaw).toVector3f()));
     }
 
     @Override
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (CEILING.equals(key)) refreshDimensions();
+        if (ATTACH_FACE.equals(key)) refreshDimensions();
     }
 
     @Override
     public boolean isNoGravity() {
-        return isCeiling() || super.isNoGravity();
+        return getAttachFace() != Direction.DOWN || super.isNoGravity();
     }
 
     @Override
     //? if forge {
     protected float getStandingEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
-        return isCeiling() ? dimensions.height * 0.25F : super.getStandingEyeHeight(pose, dimensions);
+        return getAttachFace() == Direction.DOWN ? super.getStandingEyeHeight(pose, dimensions) : dimensions.height * (getAttachFace() == Direction.UP ? 0.25F : 0.5F);
     }
     //?} else {
     /*protected @NotNull EntityDimensions getDefaultDimensions(@NotNull Pose pose) {
         EntityDimensions dimensions = super.getDefaultDimensions(pose);
-        return isCeiling() ? dimensions.withEyeHeight(dimensions.height() * 0.25F) : dimensions;
+        return getAttachFace() == Direction.DOWN ? dimensions : dimensions.withEyeHeight(dimensions.height() * (getAttachFace() == Direction.UP ? 0.25F : 0.5F));
     }
     *///?}
 
@@ -334,7 +375,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         tag.putString("PlayerTargeting", playerTargeting.name());
         tag.putString("OwnerName", ownerName);
         tag.putInt("Energy", energy.getEnergyStored());
-        tag.putBoolean("Ceiling", isCeiling());
+        tag.putString("AttachFace", getAttachFace().name());
         tag.putString("Type", getTurretType().name());
         if (!getPaint().isEmpty()) tag.put(PAINT_TAG, savePaint());
         if (!isSentry()) return;
@@ -360,7 +401,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         playerTargeting = Enums.byName(tag.getString("PlayerTargeting"), PlayerTargeting.RETALIATE);
         ownerName = tag.getString("OwnerName");
         energy.setEnergy(tag.getInt("Energy"));
-        setCeiling(tag.getBoolean("Ceiling"));
+        setAttachFace(Enums.byName(tag.getString("AttachFace"), tag.getBoolean("Ceiling") ? Direction.UP : Direction.DOWN));
         loadPaint(tag);
         if (tag.contains("Loadout")) loadout = Objects.requireNonNullElse(ResourceLocation.tryParse(tag.getString("Loadout")), SentryLoadout.DEFAULT);
         rolled = tag.getBoolean("Rolled");
@@ -517,12 +558,6 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         return stack.getItem() instanceof BannerItem || stack.getItem() instanceof DyeItem || stack.getItem() instanceof CamoItem;
     }
 
-    private void removeCamo() {
-        if (!(getPaint().getItem() instanceof CamoItem)) return;
-        if (TACZTurretsConfig.RETURN_CAMOS.get()) spawnAtLocation(getPaint().copy());
-        setPaint(ItemStack.EMPTY);
-    }
-
     private Tag savePaint() {
         //? if forge {
         return getPaint().save(new CompoundTag());
@@ -677,11 +712,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     @Nullable
     private BlockEntity getSupplyBlockEntity() {
         BlockEntity blockEntity = level().getBlockEntity(blockPosition());
-        return blockEntity == null ? level().getBlockEntity(isCeiling() ? blockPosition().above() : blockPosition().below()) : blockEntity;
+        return blockEntity == null ? level().getBlockEntity(blockPosition().relative(getAttachFace())) : blockEntity;
     }
 
     private Direction getSupplySide() {
-        return isCeiling() ? Direction.DOWN : Direction.UP;
+        return getAttachFace().getOpposite();
     }
 
     //? if forge {
@@ -770,7 +805,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private void tickRotation() {
-        entityData.set(ROTATION_SPEED, hasCog() ? CreateCompat.cogSpeed(level(), blockPosition()) : 0.0F);
+        entityData.set(ROTATION_SPEED, hasCog() ? CreateCompat.cogSpeed(level(), blockPosition(), getAttachFace().getAxis()) : 0.0F);
     }
 
     private void syncAttributes() {
@@ -833,10 +868,10 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (!level().isClientSide()) {
             if (isSentry() && !rolled) rollLoadout(level().getBiome(blockPosition()));
             if (!tracked) trackPlacement();
-            BlockPos ceiling = blockPosition().above();
-            if (isCeiling() && !Block.isFaceFull(level().getBlockState(ceiling).getCollisionShape(level(), ceiling), Direction.DOWN)) setCeiling(false);
+            BlockPos support = blockPosition().relative(getAttachFace());
+            if (getAttachFace() != Direction.DOWN && !Block.isFaceFull(level().getBlockState(support).getCollisionShape(level(), support), getAttachFace().getOpposite())) setAttachFace(Direction.DOWN);
             dropOverflow();
-            if (!isCeiling() && !onGround() && !level().getEntitiesOfClass(TurretEntity.class, getBoundingBox(), turret -> turret != this).isEmpty()) {
+            if (getAttachFace() == Direction.DOWN && !onGround() && !level().getEntitiesOfClass(TurretEntity.class, getBoundingBox(), turret -> turret != this).isEmpty()) {
                 dropContents();
                 spawnAtLocation(toItem());
                 playTurretSound(SoundRegistry.TURRET_PICKUP.get());
@@ -930,7 +965,6 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         }
         if (player.isCrouching() && heldStack.getItem() instanceof AxeItem) {
             if (!getPaint().isEmpty()) {
-                removeCamo();
                 setPaint(ItemStack.EMPTY);
                 //? if forge {
                 heldStack.hurtAndBreak(1, player, user -> user.broadcastBreakEvent(hand));
@@ -945,9 +979,8 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (player.isCrouching() && isPaint(heldStack)) {
             ItemStack paint = heldStack.copyWithCount(1);
             if (!ItemStack.matches(getPaint(), paint)) {
-                removeCamo();
                 setPaint(paint);
-                if (!player.isCreative()) heldStack.shrink(1);
+                if (!player.isCreative() && (paint.getItem() instanceof CamoItem ? TACZTurretsConfig.CONSUME_CAMOS : paint.getItem() instanceof DyeItem ? TACZTurretsConfig.CONSUME_DYES : TACZTurretsConfig.CONSUME_BANNERS).get()) heldStack.shrink(1);
                 playTurretSound(SoundEvents.DYE_USE);
             }
             return InteractionResult.SUCCESS;
@@ -1123,7 +1156,6 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (dropTurret) spawnAtLocation(toItem());
         if (!TACZTurretsConfig.DROP_ITEMS_ON_DEATH.get()) return;
         dropContents();
-        if (!dropTurret) removeCamo();
     }
 
     //? if forge {
@@ -1296,7 +1328,12 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private static ExtendedBehaviour<TurretEntity> idleLook() {
-        return new SetRandomLookTarget<TurretEntity>().lookChance(ConstantFloat.of(1.0F)).lookTime(entity -> 40 + entity.getRandom().nextInt(60)).startCondition(entity -> TACZTurretsConfig.IDLE_LOOK_AROUND.get());
+        return new SetRandomLookTarget<TurretEntity>() {
+            @Override
+            protected void start(TurretEntity entity) {
+                BrainUtils.setForgettableMemory(entity, MemoryModuleType.LOOK_TARGET, new FreePositionTracker(entity.getEyePosition().add(entity.idleLookDirection())), lookTime.apply(entity));
+            }
+        }.lookChance(ConstantFloat.of(1.0F)).lookTime(entity -> 40 + entity.getRandom().nextInt(60)).startCondition(entity -> TACZTurretsConfig.IDLE_LOOK_AROUND.get());
     }
 
     public BrainActivityGroup<? extends TurretEntity> getFightTasks() {

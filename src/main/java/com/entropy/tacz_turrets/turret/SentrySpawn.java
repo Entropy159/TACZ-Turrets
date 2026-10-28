@@ -37,9 +37,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public record SentrySpawn(Where where, ResourceLocation loadout, List<String> structures, List<String> biomes, float chance, SentryLoadout.Range count, float ceilingChance) {
+public record SentrySpawn(Where where, ResourceLocation loadout, List<String> structures, List<String> biomes, float chance, SentryLoadout.Range count, float ceilingChance, float wallChance) {
     private static final int ATTEMPTS = 16;
     private static final int CAVE_SCAN = 32;
+    private static final List<Direction> FLOOR = List.of(Direction.DOWN);
     private static final Codec<Float> CHANCE = Codec.floatRange(0.0F, 1.0F);
     public static final Codec<SentrySpawn> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.comapFlatMap(Where::parse, where -> where.name().toLowerCase(Locale.ROOT)).fieldOf("where").forGetter(SentrySpawn::where),
@@ -48,7 +49,8 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
             Codec.STRING.listOf().optionalFieldOf("biomes", List.of()).forGetter(SentrySpawn::biomes),
             CHANCE.optionalFieldOf("chance", 1.0F).forGetter(SentrySpawn::chance),
             SentryLoadout.Range.CODEC.optionalFieldOf("count", new SentryLoadout.Range(1, 1)).forGetter(SentrySpawn::count),
-            CHANCE.optionalFieldOf("ceiling_chance", 0.0F).forGetter(SentrySpawn::ceilingChance)
+            CHANCE.optionalFieldOf("ceiling_chance", 0.0F).forGetter(SentrySpawn::ceilingChance),
+            CHANCE.optionalFieldOf("wall_chance", 0.0F).forGetter(SentrySpawn::wallChance)
     ).apply(instance, SentrySpawn::new));
     private static volatile Map<ResourceLocation, SentrySpawn> spawns = Map.of();
 
@@ -72,14 +74,15 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
                 BoundingBox box = start.getPieces().get(random.nextInt(start.getPieces().size())).getBoundingBox();
                 int x = Mth.randomBetweenInclusive(random, box.minX(), box.maxX());
                 int z = Mth.randomBetweenInclusive(random, box.minZ(), box.maxZ());
-                boolean ceiling = random.nextFloat() < spawn.ceilingChance;
+                float side = random.nextFloat();
                 RandomSource retry = RandomSource.create(random.nextLong());
                 if (x < chunkBox.minX() || x > chunkBox.maxX() || z < chunkBox.minZ() || z > chunkBox.maxZ()) continue;
+                List<Direction> faces = spawn.faces(side, retry);
                 int minX = Math.max(box.minX(), chunkBox.minX()), maxX = Math.min(box.maxX(), chunkBox.maxX());
                 int minZ = Math.max(box.minZ(), chunkBox.minZ()), maxZ = Math.min(box.maxZ(), chunkBox.maxZ());
                 for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                    BlockPos spot = scan(level, x, z, box.maxY(), box.minY(), ceiling);
-                    if (spot != null && spawn.place(level, spot, ceiling, retry, MobSpawnType.STRUCTURE)) break;
+                    Spot spot = scan(level, x, z, box.maxY(), box.minY(), faces);
+                    if (spot != null && spawn.place(level, spot, retry, MobSpawnType.STRUCTURE)) break;
                     x = Mth.randomBetweenInclusive(retry, minX, maxX);
                     z = Mth.randomBetweenInclusive(retry, minZ, maxZ);
                 }
@@ -97,9 +100,8 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
                 for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
                     int x = chunkPos.getMinBlockX() + random.nextInt(16);
                     int z = chunkPos.getMinBlockZ() + random.nextInt(16);
-                    boolean ceiling = spawn.where == Where.CAVE && random.nextFloat() < spawn.ceilingChance;
-                    BlockPos spot = spawn.where == Where.SURFACE ? surface(level, x, z) : cave(level, random, x, z, ceiling);
-                    if (spot != null && spawn.place(level, spot, ceiling, random, MobSpawnType.CHUNK_GENERATION)) break;
+                    Spot spot = spawn.where == Where.SURFACE ? surface(level, x, z) : cave(level, random, x, z, spawn.faces(random.nextFloat(), random));
+                    if (spot != null && spawn.place(level, spot, random, MobSpawnType.CHUNK_GENERATION)) break;
                 }
             }
         });
@@ -116,34 +118,39 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
         return dx * dx + dz * dz < (double) radius * radius;
     }
 
-    @Nullable
-    private static BlockPos surface(WorldGenLevel level, int x, int z) {
-        BlockPos pos = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-        return isSpot(level, pos, false) ? pos : null;
+    private List<Direction> faces(float side, RandomSource random) {
+        if (side < wallChance) return Direction.Plane.HORIZONTAL.shuffledCopy(random);
+        return side < wallChance + ceilingChance ? List.of(Direction.UP) : FLOOR;
     }
 
     @Nullable
-    private static BlockPos cave(WorldGenLevel level, RandomSource random, int x, int z, boolean ceiling) {
+    private static Spot surface(WorldGenLevel level, int x, int z) {
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        return scan(level, x, z, y, y, FLOOR);
+    }
+
+    @Nullable
+    private static Spot cave(WorldGenLevel level, RandomSource random, int x, int z, List<Direction> faces) {
         int top = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z) - 8;
         int bottom = level.getMinBuildHeight() + 8;
         if (top <= bottom) return null;
         int y = Mth.randomBetweenInclusive(random, bottom, top);
-        return ceiling ? scan(level, x, z, y, Math.min(top, y + CAVE_SCAN), true) : scan(level, x, z, y, Math.max(bottom, y - CAVE_SCAN), false);
+        return scan(level, x, z, y, faces.get(0) == Direction.UP ? Math.min(top, y + CAVE_SCAN) : Math.max(bottom, y - CAVE_SCAN), faces);
     }
 
     @Nullable
-    private static BlockPos scan(WorldGenLevel level, int x, int z, int from, int to, boolean ceiling) {
+    private static Spot scan(WorldGenLevel level, int x, int z, int from, int to, List<Direction> faces) {
         int step = from <= to ? 1 : -1;
         for (int y = from; y != to + step; y += step) {
             BlockPos pos = new BlockPos(x, y, z);
-            if (isSpot(level, pos, ceiling)) return pos;
+            for (Direction face : faces) if (isSpot(level, pos, face)) return new Spot(pos, face);
         }
         return null;
     }
 
-    private static boolean isSpot(WorldGenLevel level, BlockPos pos, boolean ceiling) {
-        BlockPos support = ceiling ? pos.above() : pos.below();
-        return isOpen(level, pos) && isOpen(level, ceiling ? pos.below() : pos.above()) && level.getBlockState(support).isFaceSturdy(level, support, ceiling ? Direction.DOWN : Direction.UP);
+    private static boolean isSpot(WorldGenLevel level, BlockPos pos, Direction face) {
+        BlockPos support = pos.relative(face);
+        return isOpen(level, pos) && isOpen(level, pos.relative(face.getOpposite())) && level.getBlockState(support).isFaceSturdy(level, support, face.getOpposite());
     }
 
     private static boolean isOpen(WorldGenLevel level, BlockPos pos) {
@@ -155,7 +162,8 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
         return entries.isEmpty() || RegistryFilter.of(registry, entries).matches(value);
     }
 
-    private boolean place(WorldGenLevel level, BlockPos pos, boolean ceiling, RandomSource random, MobSpawnType spawnType) {
+    private boolean place(WorldGenLevel level, Spot spot, RandomSource random, MobSpawnType spawnType) {
+        BlockPos pos = spot.pos();
         if (SentryLoadout.get(loadout).map(sentry -> sentry.enabledTypes().isEmpty()).orElse(true)) return false;
         if (!matches(level.registryAccess().registryOrThrow(Registries.BIOME), biomes, level.getBiome(pos).value())) return false;
         TurretEntity sentry = EntityTypeRegistry.SENTRY.get().create(level.getLevel());
@@ -163,7 +171,7 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
         sentry.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, random.nextFloat() * 360.0F, 0.0F);
         sentry.setYHeadRot(sentry.getYRot());
         sentry.setYBodyRot(sentry.getYRot());
-        sentry.setCeiling(ceiling);
+        sentry.setAttachFace(spot.face());
         sentry.setLoadout(loadout);
         //? if forge {
         sentry.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), spawnType, null, null);
@@ -172,6 +180,9 @@ public record SentrySpawn(Where where, ResourceLocation loadout, List<String> st
         *///?}
         level.addFreshEntityWithPassengers(sentry);
         return true;
+    }
+
+    private record Spot(BlockPos pos, Direction face) {
     }
 
     public static class Listener extends SimpleJsonResourceReloadListener {

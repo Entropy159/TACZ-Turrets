@@ -28,7 +28,7 @@ public abstract class TurretWorkbenchBlockMixin extends BaseEntityBlock {
     /*protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
     *///?}
         if (!TurretWorkbench.is(level, pos, state)) return super.getDestroyProgress(state, player, level, pos);
-        return player.getDestroySpeed(Blocks.IRON_BLOCK.defaultBlockState()) / 5.0F / 30;
+        return player.getDigSpeed(Blocks.IRON_BLOCK.defaultBlockState(), pos) / 5.0F / 30;
     }
 
     @Override

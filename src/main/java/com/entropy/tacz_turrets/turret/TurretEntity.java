@@ -72,7 +72,9 @@ import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
-import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -1474,7 +1476,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         if (TACZTurretsConfig.targetWhitelist.matches(target.getType())) return true;
         if (target.getType().is(TagRegistry.TURRET_TARGETS)) return true;
         if (TACZTurretsConfig.TARGET_ALL_MOBS.get()) return true;
-        if (target instanceof Monster || target.getType().getCategory() == MobCategory.MONSTER) return true;
+        if (target instanceof Enemy || target.getType().getCategory() == MobCategory.MONSTER) return true;
         return TACZTurretsConfig.TARGET_NEUTRAL_MOBS.get() && target instanceof NeutralMob neutral && neutral.isAngry() && !(target instanceof OwnableEntity ownable && ownable.getOwnerUUID() != null);
     }
 
@@ -1499,6 +1501,21 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     @Override
     public boolean isPushable() {
         return false;
+    }
+
+    @Override
+    protected @NotNull PathNavigation createNavigation(@NotNull Level level) {
+        return new GroundPathNavigation(this, level) {
+            @Override
+            protected boolean canUpdatePath() {
+                return false;
+            }
+        };
+    }
+
+    @Override
+    public void move(@NotNull MoverType type, @NotNull Vec3 movement) {
+        super.move(type, type == MoverType.SELF ? new Vec3(0.0D, Math.min(movement.y, 0.0D), 0.0D) : movement);
     }
 
     @Override

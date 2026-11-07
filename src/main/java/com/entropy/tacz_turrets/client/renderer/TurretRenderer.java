@@ -10,6 +10,7 @@ import com.mojang.math.Axis;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.client.model.functional.BeamRenderer;
+import com.tacz.guns.client.particle.ThirdPersonMuzzleParticleManager;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
 import com.tacz.guns.client.resource.pojo.display.LaserConfig;
 import net.minecraft.client.Minecraft;
@@ -90,7 +91,9 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
             if (turret.hasMinigun()) {
                 poseStack.mulPose(Axis.XN.rotationDegrees(90));
             }
+            ThirdPersonMuzzleParticleManager.currentEntity = turret;
             Minecraft.getInstance().getItemRenderer().renderStatic(turret.getGunStack(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, packedLight, packedOverlay, poseStack, bufferSource, turret.level(), 0);
+            ThirdPersonMuzzleParticleManager.currentEntity = null;
         }
 
         poseStack.popPose();
@@ -98,11 +101,11 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
         TurretState state = TurretState.getState(turret);
         boolean visible = TACZTurretsConfig.SHOW_OTHERS_LASERS.get() || (Minecraft.getInstance().player != null && turret.isOwnerId(Minecraft.getInstance().player.getUUID()));
         if (visible && turret.isAlive() && turret.hasLaser() && state != TurretState.DISABLED && (state != TurretState.NO_GUN || TACZTurretsConfig.LASER_WITHOUT_GUN.get())) {
-            model.getBone("laser").ifPresent(laser -> renderLaser(turret, new Matrix4f(entityRenderTranslations).invert().mul(modelRenderTranslations).mul(laser.getModelSpaceMatrix()), poseStack, partialTick));
+            model.getBone("laser").ifPresent(laser -> renderLaser(turret, new Matrix4f(entityRenderTranslations).invert().mul(modelRenderTranslations).mul(laser.getModelSpaceMatrix()), poseStack, bufferSource, partialTick));
         }
     }
 
-    private static void renderLaser(TurretEntity turret, Matrix4f bone, PoseStack poseStack, float partialTick) {
+    private static void renderLaser(TurretEntity turret, Matrix4f bone, PoseStack poseStack, MultiBufferSource bufferSource, float partialTick) {
         ItemStack laser = turret.getLaserStack();
         LaserConfig config = TimelessAPI.getClientAttachmentIndex(IAttachment.getIAttachmentOrNull(laser).getAttachmentId(laser)).map(ClientAttachmentIndex::getLaserConfig).orElse(null);
         if (config == null || config.getLengthThird() <= 0) return;
@@ -117,7 +120,7 @@ public class TurretRenderer extends GeoEntityRenderer<TurretEntity> {
         poseStack.pushPose();
         poseStack.last().pose().mul(bone);
         poseStack.scale(1, 1, (float) (start.distanceTo(stop) / forward.length()) / config.getLengthThird());
-        BeamRenderer.renderLaserBeam(laser, poseStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, List.of());
+        BeamRenderer.renderLaserBeam(laser, poseStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, List.of(), bufferSource);
         poseStack.popPose();
     }
 }

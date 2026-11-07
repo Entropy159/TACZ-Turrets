@@ -11,6 +11,7 @@ import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.ClientAssetsManager;
+import com.tacz.guns.client.resource.pojo.display.SoundData;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import com.tacz.guns.client.resource.pojo.animation.bedrock.BedrockAnimationFile;
 import com.tacz.guns.config.common.GunConfig;
@@ -113,7 +114,7 @@ public class TurretReloadSound {
     private static void playDisplaySound(TurretEntity turret, ReloadState.StateType state) {
         ItemStack gunStack = turret.getGunStack();
         String name = state.isReloadingTactical() ? TACTICAL_ANIMATION : EMPTY_ANIMATION;
-        ResourceLocation sound = TimelessAPI.getGunDisplay(gunStack).map(display -> display.getSounds(name)).orElse(null);
+        SoundData sound = TimelessAPI.getGunDisplay(gunStack).map(display -> display.getSounds(name)).orElse(null);
         if (sound == null) return;
         SoundPlayManager.playClientSound(turret, sound, 1.0F, 1.0F, GunConfig.DEFAULT_GUN_OTHER_SOUND_DISTANCE.get());
     }

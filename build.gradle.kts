@@ -58,7 +58,7 @@ dependencies {
     include(geckolib)
     modImplementation(smartbrainlib)
     include(smartbrainlib)
-    val tacz = "maven.modrinth:${mod.dep("tacz_slug")}:${mod.dep("tacz")}"
+    val tacz = "maven.modrinth:timeless-and-classics-zero:${mod.dep("tacz")}"
     modImplementation(tacz)
     modCompileOnly("dev.ftb.mods:ftb-teams-$loader:${mod.dep("ftbteams")}") { isTransitive = false }
     modCompileOnly("maven.modrinth:open-parties-and-claims:${mod.dep("opac")}") { isTransitive = false }
@@ -122,7 +122,7 @@ tasks.processResources {
         "minecraft" to mod.prop("mc_dep"),
         "loader_range" to mod.prop("loader_range"),
         "pack_format" to mod.prop("pack_format"),
-        "tacz" to mod.dep("tacz"),
+        "tacz" to mod.dep("tacz_min"),
         "geckolib" to mod.dep("geckolib"),
         "smartbrainlib" to mod.dep("smartbrainlib"),
         "ftbteams_min" to mod.dep("ftbteams_min"),

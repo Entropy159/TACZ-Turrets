@@ -15,6 +15,14 @@
         "item": "tacz_turrets:forest_camo",
         "id": "tacz_turrets:forest_camo"
       }
+    },
+    {
+      "id": "tacz_turrets:misc",
+      "name": "tacz_turrets.tab.misc",
+      "icon": {
+        "item": "tacz_turrets:laser_designator",
+        "id": "tacz_turrets:laser_designator"
+      }
     }
   ]
 }

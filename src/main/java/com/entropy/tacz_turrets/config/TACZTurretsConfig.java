@@ -223,6 +223,10 @@ public class TACZTurretsConfig {
             .comment("Turrets make a sound when they look around.")
             .define("panSounds", true);
 
+    public static final BooleanValue LASER_LOCK_ON = BUILDER
+            .comment("The Laser Designator's laser will lock on to an entity when pointed at.")
+            .define("laserLockOn", false);
+
     public static final IntValue MAX_TURRETS_PER_PLAYER = BUILDER
             .comment("Most turrets one player can have placed. 0 means no limit.")
             .defineInRange("maxTurretsPerPlayer", 0, 0, 10000);

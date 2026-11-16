@@ -1,0 +1,30 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/iron"
+      },
+      "count": 8
+    },
+    {
+      "item": {
+        "tag": "c:dusts/redstone"
+      },
+      "count": 6
+    },
+    {
+      "item": {
+        "tag": "c:glass_blocks"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "tacz_turrets:misc",
+    "item": {
+      "id": "tacz_turrets:laser_designator"
+    }
+  }
+}

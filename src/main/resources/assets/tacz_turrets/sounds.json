@@ -43,5 +43,13 @@
       "tacz_turrets:turret_pan3",
       "tacz_turrets:turret_pan4"
     ]
+  },
+  "laser_click": {
+    "subtitle": "subtitles.tacz_turrets.laser_click",
+    "sounds": [
+      "tacz_turrets:laser_click1",
+      "tacz_turrets:laser_click2",
+      "tacz_turrets:laser_click3"
+    ]
   }
 }

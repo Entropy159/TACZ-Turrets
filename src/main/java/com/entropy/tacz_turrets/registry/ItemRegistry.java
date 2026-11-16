@@ -2,6 +2,7 @@ package com.entropy.tacz_turrets.registry;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.item.CamoItem;
+import com.entropy.tacz_turrets.item.LaserDesignatorItem;
 import com.entropy.tacz_turrets.item.SentrySpawnEggItem;
 import com.entropy.tacz_turrets.item.TurretItem;
 import com.entropy.tacz_turrets.turret.TurretType;
@@ -33,6 +34,7 @@ public class ItemRegistry {
     }
 
     public static final Supplier<Item> SENTRY_SPAWN_EGG = ITEMS.register("sentry_turret_spawn_egg", SentrySpawnEggItem::new);
+    public static final Supplier<Item> LASER_DESIGNATOR = ITEMS.register("laser_designator", LaserDesignatorItem::new);
 
     public static TurretItem turret(TurretType type) {
         return TURRETS.get(type).get();

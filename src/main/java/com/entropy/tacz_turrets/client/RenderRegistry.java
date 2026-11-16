@@ -1,10 +1,12 @@
 package com.entropy.tacz_turrets.client;
 
+import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.client.renderer.TurretRenderer;
 import com.entropy.tacz_turrets.client.screen.TurretScreen;
 import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
 import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.registry.MenuRegistry;
+import net.minecraft.client.renderer.item.ItemProperties;
 //? if forge {
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
@@ -48,6 +50,7 @@ public class RenderRegistry {
         event.enqueueWork(() -> {
             //? if forge
             MenuScreens.register(MenuRegistry.TURRET.get(), TurretScreen::new);
+            ItemProperties.register(ItemRegistry.LASER_DESIGNATOR.get(), TACZTurrets.id("pressed"), (stack, level, entity, seed) -> DesignatorClient.isPressed(entity) ? 1.0F : 0.0F);
         });
         //? if neoforge
         /*ModList.get().getModContainerById(MODID).ifPresent(container -> container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new));*/

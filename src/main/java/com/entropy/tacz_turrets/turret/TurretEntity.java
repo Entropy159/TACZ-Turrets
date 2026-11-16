@@ -8,6 +8,7 @@ import com.entropy.tacz_turrets.compat.OpenPACCompat;
 import com.entropy.tacz_turrets.compat.RecruitsCompat;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
 import com.entropy.tacz_turrets.item.CamoItem;
+import com.entropy.tacz_turrets.item.LaserDesignatorItem;
 import com.entropy.tacz_turrets.menu.TurretLayout;
 import com.entropy.tacz_turrets.menu.TurretMenu;
 import com.entropy.tacz_turrets.registry.EntityTypeRegistry;
@@ -89,7 +90,10 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.phys.Vec3;
 //? if forge {
@@ -179,6 +183,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private static final int LOCK_ON_GAP = 20;
     private static final int PAN_COOLDOWN = 20;
     private static final float IDLE_WALL_TILT = 45.0F;
+    private static final double DESIGNATOR_AIM = Math.cos(Math.toRadians(4.0D));
     private static final EntityDataAccessor<Integer> RECOIL = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Direction> ATTACH_FACE = SynchedEntityData.defineId(TurretEntity.class, EntityDataSerializers.DIRECTION);
@@ -195,6 +200,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     private boolean infiniteAmmo = false;
     private boolean tracked = false;
     private int lockOnTicks = 0;
+    private boolean designated = false;
     private int lastTargetTick = -100;
     private boolean wasTurning = false;
     private int lastPanTick = -100;
@@ -920,6 +926,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     protected @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
+        if (player.getItemInHand(hand).getItem() instanceof LaserDesignatorItem) return linkDesignator(player, player.getItemInHand(hand));
         boolean manages = canInteract(player);
         if (!manages && isSentry()) return InteractionResult.PASS;
         if (!manages && player.isCrouching()) {
@@ -940,6 +947,18 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             /*serverPlayer.openMenu(this, buf -> writeMenuData(buf, layout, manages));
             *///?}
         }
+        return InteractionResult.SUCCESS;
+    }
+
+    private InteractionResult linkDesignator(Player player, ItemStack designator) {
+        if (level().isClientSide()) return InteractionResult.SUCCESS;
+        if (!canInteract(player)) {
+            player.displayClientMessage(Component.translatable("message.tacz_turrets.designator.not_allowed"), true);
+            return InteractionResult.SUCCESS;
+        }
+        boolean linked = LaserDesignatorItem.toggleLink(designator, getUUID());
+        player.displayClientMessage(Component.translatable(linked ? "message.tacz_turrets.designator.linked" : "message.tacz_turrets.designator.unlinked", LaserDesignatorItem.linked(designator).size()), true);
+        if (linked) playTurretSound(SoundRegistry.TURRET_LOCK_ON.get());
         return InteractionResult.SUCCESS;
     }
 
@@ -1023,6 +1042,11 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     }
 
     private void tickLockOn() {
+        if (designated) {
+            lockOnTicks = 0;
+            lastTargetTick = tickCount;
+            return;
+        }
         if (lockOnTicks > 0) lockOnTicks--;
         if (BrainUtils.getTargetOfEntity(this) == null || !hasGun() || !isEnabled()) return;
         if (TACZTurretsConfig.LOCK_ON_DELAY.get() && tickCount - lastTargetTick > LOCK_ON_GAP) {
@@ -1259,12 +1283,42 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
 
     @Override
     protected void customServerAiStep() {
+        boolean wasDesignated = designated;
+        designated = hasGun() && isEnabled() && followDesignator();
+        if (wasDesignated && !designated) super.setTarget(null);
         if (!hasGun() || !isEnabled()) return;
         if (retaliateTicks < 0 && TACZTurretsConfig.RETALIATE_TARGETING.get() != RetaliateTargeting.CLEAR_ON_DEATH) retaliateTicks = retaliationTicks();
         if (retaliateTicks > 0 && --retaliateTicks == 0) retaliateTarget = null;
+        if (designated) return;
         tickBrain(this);
         retargetImmediately();
         spreadTargets();
+    }
+
+    private boolean followDesignator() {
+        for (Player player : level().players()) {
+            if (!LaserDesignatorItem.isLinked(LaserDesignatorItem.held(player), getUUID()) || !canInteract(player)) continue;
+            HitResult hit = LaserDesignatorItem.serverAim(player);
+            LivingEntity target = hit instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living ? living : null;
+            Vec3 point = hit.getLocation();
+            double range = getRange();
+            if (distanceToSqr(point) > range * range) continue;
+            BrainUtils.clearMemory(this, MemoryModuleType.ATTACK_TARGET);
+            if (getTarget() != target) super.setTarget(target);
+            getLookControl().setLookAt(point.x, point.y, point.z);
+            if (LaserDesignatorItem.isFiring(player) && gunOperator.getSynShootCoolDown() == 0 && isAimedAt(point) && hasClearShot(point)) tryShoot();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAimedAt(Vec3 point) {
+        return Vec3.directionFromRotation(getXRot(), getYHeadRot()).dot(point.subtract(getEyePosition()).normalize()) > DESIGNATOR_AIM;
+    }
+
+    private boolean hasClearShot(Vec3 point) {
+        HitResult clip = level().clip(new ClipContext(getEyePosition(), point, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+        return clip.getType() == HitResult.Type.MISS || clip.getLocation().distanceToSqr(point) < 0.25D;
     }
 
     private void retargetImmediately() {

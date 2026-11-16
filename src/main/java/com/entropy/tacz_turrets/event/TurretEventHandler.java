@@ -2,6 +2,7 @@ package com.entropy.tacz_turrets.event;
 
 import com.entropy.tacz_turrets.TACZTurrets;
 import com.entropy.tacz_turrets.config.TACZTurretsConfig;
+import com.entropy.tacz_turrets.item.LaserDesignatorItem;
 import com.entropy.tacz_turrets.registry.ItemRegistry;
 import com.entropy.tacz_turrets.turret.RetaliateTargeting;
 import com.entropy.tacz_turrets.turret.SentryLoadout;
@@ -17,6 +18,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraft.world.item.Item;
@@ -29,6 +31,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 *///?}
 
 import javax.annotation.Nullable;
@@ -99,6 +102,11 @@ public class TurretEventHandler {
         if (TACZTurretsConfig.PROTECT_OWNER.get() && victim instanceof Player owner && event.getSource().getEntity() instanceof LivingEntity attacker) {
             defendOwner(owner, attacker);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        LaserDesignatorItem.forget(event.getEntity());
     }
 
     @SubscribeEvent

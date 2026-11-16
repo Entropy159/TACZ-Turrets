@@ -1,0 +1,32 @@
+{
+  "loader": "${loader}:separate_transforms",
+  "gui_light": "front",
+  "textures": {
+    "particle": "tacz_turrets:item/laser_designator_model"
+  },
+  "base": {
+    "parent": "tacz_turrets:item/laser_designator_in_hand"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "tacz_turrets:item/laser_designator"
+      }
+    },
+    "ground": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "tacz_turrets:item/laser_designator"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "tacz_turrets:pressed": 1
+      },
+      "model": "tacz_turrets:item/laser_designator_pressed"
+    }
+  ]
+}

@@ -276,7 +276,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
     public void setTurretType(TurretType type) {
         entityData.set(TYPE, type.ordinal());
         energy.setLimits(stats().energyCapacity.get(), stats().energyTransferRate.get());
-        resizeInventory();
+        resizeInventory(TurretLayout.forType(type).ammoSlots);
     }
 
     public TACZTurretsConfig.TurretStats stats() {
@@ -1057,8 +1057,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
         serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + getBbHeight() * 0.6D, getZ(), 12, getBbWidth() * 0.5D, getBbHeight() * 0.4D, getBbWidth() * 0.5D, 0.0D);
     }
 
-    private void resizeInventory() {
-        int desired = TurretLayout.forType(getTurretType()).ammoSlots;
+    public void resizeInventory(int desired) {
         if (inventory.getSlots() == desired) return;
         List<ItemStack> kept = new ArrayList<>();
         for (int slot = 0; slot < inventory.getSlots(); slot++) kept.add(inventory.getStackInSlot(slot));
@@ -1068,7 +1067,7 @@ public class TurretEntity extends Mob implements SmartBrainOwner<TurretEntity>, 
             if (stack.isEmpty()) continue;
             if (slot < desired) {
                 inventory.setStackInSlot(slot, stack);
-            } else {
+            } else if (!level().isClientSide()) {
                 overflow.add(stack);
             }
         }

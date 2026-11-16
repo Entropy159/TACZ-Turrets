@@ -17,6 +17,7 @@ public class TurretContainer implements Container {
     public TurretContainer(TurretEntity turret, int ammoSlots) {
         this.turret = turret;
         this.ammoSlots = ammoSlots;
+        turret.resizeInventory(ammoSlots);
     }
 
     public TurretEntity getTurret() {
